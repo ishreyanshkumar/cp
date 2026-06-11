@@ -1,0 +1,115 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>2D Segment Tree</Title>
+		<Author>Tempest</Author>
+		<Description>2D Segment Tree for point update and 2D range query (Sum/Min/Max). O(log N * log M) per operation. Space O(N*M).</Description>
+		<Shortcut>dsseg2d</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m; re(n, m);
+	vector<vi> a(n, vi(m));
+	for (int i=0; i<n; ++i) re(a[i]);
+    
+	SegTree2D st(a);
+    
+	int q; re(q);
+	while (q--) {
+		int type; re(type);
+		if (type == 1) {
+			int r, c; ll val; re(r, c, val);
+			st.update(r, c, val);
+		} else {
+			int r1, c1, r2, c2; re(r1, c1, r2, c2);
+			pr(st.query(r1, c1, r2, c2)); cout << '\n';
+		}
+	}
+}
+*/
+
+struct SegTree2D {
+	int n, m;
+	vector<vector<ll>> tree;
+	const ll ID = 0; // 0 for Sum | BIG for Min | -BIG for Max
+
+	ll merge(ll a, ll b) { return a + b; } // Change: min(a,b) or max(a,b)
+
+	SegTree2D(int _n, int _m) : n(_n), m(_m) {
+		tree.assign(4 * n, vector<ll>(4 * m, ID));
+	}
+
+	SegTree2D(const vector<vi>& a) {
+		n = sz(a);
+		m = sz(a[0]);
+		tree.assign(4 * n, vector<ll>(4 * m, ID));
+		build_x(a, 1, 0, n - 1);
+	}
+
+	void build_y(const vector<vi>& a, int vx, int lx, int rx, int vy, int ly, int ry) {
+		if (ly == ry) {
+			if (lx == rx) tree[vx][vy] = a[lx][ly];
+			else tree[vx][vy] = merge(tree[2 * vx][vy], tree[2 * vx + 1][vy]);
+		} else {
+			int my = (ly + ry) / 2;
+			build_y(a, vx, lx, rx, 2 * vy, ly, my);
+			build_y(a, vx, lx, rx, 2 * vy + 1, my + 1, ry);
+			tree[vx][vy] = merge(tree[vx][2 * vy], tree[vx][2 * vy + 1]);
+		}
+	}
+
+	void build_x(const vector<vi>& a, int vx, int lx, int rx) {
+		if (lx != rx) {
+			int mx = (lx + rx) / 2;
+			build_x(a, 2 * vx, lx, mx);
+			build_x(a, 2 * vx + 1, mx + 1, rx);
+		}
+		build_y(a, vx, lx, rx, 1, 0, m - 1);
+	}
+
+	void update_y(int vx, int lx, int rx, int vy, int ly, int ry, int x, int y, ll val) {
+		if (ly == ry) {
+			if (lx == rx) tree[vx][vy] = val;
+			else tree[vx][vy] = merge(tree[2 * vx][vy], tree[2 * vx + 1][vy]);
+		} else {
+			int my = (ly + ry) / 2;
+			if (y <= my) update_y(vx, lx, rx, 2 * vy, ly, my, x, y, val);
+			else         update_y(vx, lx, rx, 2 * vy + 1, my + 1, ry, x, y, val);
+			tree[vx][vy] = merge(tree[vx][2 * vy], tree[vx][2 * vy + 1]);
+		}
+	}
+
+	void update_x(int vx, int lx, int rx, int x, int y, ll val) {
+		if (lx != rx) {
+			int mx = (lx + rx) / 2;
+			if (x <= mx) update_x(2 * vx, lx, mx, x, y, val);
+			else         update_x(2 * vx + 1, mx + 1, rx, x, y, val);
+		}
+		update_y(vx, lx, rx, 1, 0, m - 1, x, y, val);
+	}
+
+	ll query_y(int vx, int vy, int ly, int ry, int lly, int rry) {
+		if (lly > ry || rry < ly) return ID;
+		if (lly <= ly && ry <= rry) return tree[vx][vy];
+		int my = (ly + ry) / 2;
+		return merge(query_y(vx, 2 * vy, ly, my, lly, rry),
+		             query_y(vx, 2 * vy + 1, my + 1, ry, lly, rry));
+	}
+
+	ll query_x(int vx, int lx, int rx, int llx, int rrx, int lly, int rry) {
+		if (llx > rx || rrx < lx) return ID;
+		if (llx <= lx && rx <= rrx) return query_y(vx, 1, 0, m - 1, lly, rry);
+		int mx = (lx + rx) / 2;
+		return merge(query_x(2 * vx, lx, mx, llx, rrx, lly, rry),
+		             query_x(2 * vx + 1, mx + 1, rx, llx, rrx, lly, rry));
+	}
+
+	void update(int r, int c, ll val) { update_x(1, 0, n - 1, r, c, val); }
+	ll query(int r1, int c1, int r2, int c2) { return query_x(1, 0, n - 1, r1, r2, c1, c2); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

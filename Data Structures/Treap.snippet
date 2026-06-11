@@ -1,0 +1,109 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Treap (Implicit / Cartesian Tree)</Title>
+		<Author>Tempest</Author>
+		<Description>Implicit Treap supporting array operations like reversing segments. O(log N) per operation.</Description>
+		<Shortcut>dstreap</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+    
+	Treap t;
+	for (int x : a) t.insert(t.root, t.size(t.root), new Node(x));
+    
+	while (q--) {
+		int l, r; re(l, r); // 0-based
+		t.reverse(l, r);
+	}
+	t.print(t.root); cout << '\n';
+}
+*/
+
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+
+struct Node {
+	int val, prior, sz;
+	bool rev;
+	Node *l, *r;
+	Node(int _val) : val(_val), prior(rnd()), sz(1), rev(false), l(NULL), r(NULL) {}
+};
+
+struct Treap {
+	Node* root = NULL;
+
+	int size(Node* t) { return t ? t->sz : 0; }
+	void push(Node* t) {
+		if (t && t->rev) {
+			t->rev = false;
+			swap(t->l, t->r);
+			if (t->l) t->l->rev ^= true;
+			if (t->r) t->r->rev ^= true;
+		}
+	}
+	void upd(Node* t) {
+		if (t) {
+			t->sz = 1 + size(t->l) + size(t->r);
+		}
+	}
+
+	void split(Node* t, Node*& l, Node*& r, int pos, int add = 0) {
+		if (!t) return void(l = r = NULL);
+		push(t);
+		int curr_pos = add + size(t->l);
+		if (curr_pos <= pos) {
+			split(t->r, t->r, r, pos, curr_pos + 1);
+			l = t;
+		} else {
+			split(t->l, l, t->l, pos, add);
+			r = t;
+		}
+		upd(t);
+	}
+
+	void merge(Node*& t, Node* l, Node* r) {
+		push(l); push(r);
+		if (!l || !r) t = l ? l : r;
+		else if (l->prior > r->prior) {
+			merge(l->r, l->r, r);
+			t = l;
+		} else {
+			merge(r->l, l, r->l);
+			t = r;
+		}
+		upd(t);
+	}
+
+	void insert(Node*& t, int pos, Node* it) {
+		if (!t) { t = it; return; }
+		Node *t1, *t2;
+		split(t, t1, t2, pos - 1);
+		merge(t1, t1, it);
+		merge(t, t1, t2);
+	}
+
+	void reverse(int l, int r) {
+		Node *t1, *t2, *t3;
+		split(root, t1, t2, l - 1);
+		split(t2, t2, t3, r - l);
+		if (t2) t2->rev ^= true;
+		merge(root, t1, t2);
+		merge(root, root, t3);
+	}
+
+	void print(Node* t) {
+		if (!t) return;
+		push(t);
+		print(t->l);
+		cout << t->val << " ";
+		print(t->r);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>
