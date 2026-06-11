@@ -1,0 +1,60 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>LCA — Binary Lifting</Title>
+		<Author>Graphest</Author>
+		<Description>Standalone LCA struct built from a Graph. O(N log N) build, O(log N) LCA and k-th ancestor, O(1) distance with LCA. 0-based nodes.</Description>
+		<Shortcut>trlca</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	Graph G(n);
+	G.read(n - 1, false); // undirected tree
+
+	LCA lca(G); // rooted at 0
+
+	int u, v; re(u, v); u--; v--;
+	pr(lca.get(u, v));    // LCA node
+	pr(lca.dist(u, v));   // distance
+}
+*/
+
+struct LCA {
+	int n, L;
+	vector<vi> up;
+	vi depth;
+
+	LCA(const Graph& G, int root = 0)
+		: n(G.n), L(32 - __builtin_clz(max(G.n, 2))), up(G.n, vi(L, root)), depth(G.n, 0) {
+		dfs(root, root, G);
+	}
+
+	void dfs(int u, int p, const Graph& G) {
+		up[u][0] = p;
+		FOR(i, 1, L) up[u][i] = up[up[u][i-1]][i-1];
+		EACH(v, G.adj[u]) if (v != p) { depth[v] = depth[u] + 1; dfs(v, u, G); }
+	}
+
+	// k-th ancestor of u (returns root if k > depth[u])
+	int jmp(int u, int k) {
+		F0R(i, L) if ((k >> i) & 1) u = up[u][i];
+		return u;
+	}
+
+	int get(int u, int v) {
+		if (depth[u] < depth[v]) swap(u, v);
+		u = jmp(u, depth[u] - depth[v]);
+		if (u == v) return u;
+		ROF(i, 0, L) if (up[u][i] != up[v][i]) { u = up[u][i]; v = up[v][i]; }
+		return up[u][0];
+	}
+
+	int dist(int u, int v) { return depth[u] + depth[v] - 2 * depth[get(u, v)]; }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

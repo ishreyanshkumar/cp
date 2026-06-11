@@ -1,0 +1,52 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Rerooting DP (All-Roots Tree DP)</Title>
+		<Author>Graphest</Author>
+		<Description>Computes a DP value for every node as the root in O(N) using two DFS passes: down-pass builds subtree DPs, up-pass propagates parent information. Example: sum of distances from each node to all others.</Description>
+		<Shortcut>trreroot</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example: sum of distances from node u to all others ---
+void solve() {
+	int n; re(n);
+	Graph G(n); G.read(n-1, false);
+
+	vi sub_sz(n, 1), down(n, 0), ans(n, 0);
+
+	// Pass 1: compute subtree sizes and down[] (sum of dist in subtree)
+	function<void(int,int)> dfs1 = [&](int u, int p) {
+		EACH(v, G.adj[u]) if (v != p) {
+			dfs1(v, u);
+			sub_sz[u] += sub_sz[v];
+			down[u] += down[v] + sub_sz[v]; // each node in v's subtree is 1 step farther
+		}
+	};
+
+	// Pass 2: propagate ans[] down from root
+	function<void(int,int)> dfs2 = [&](int u, int p) {
+		EACH(v, G.adj[u]) if (v != p) {
+			// ans[v] = ans[u] - sub_sz[v] (nodes in v's subtree get 1 closer)
+			//                 + (n - sub_sz[v]) (all other nodes get 1 farther)
+			ans[v] = ans[u] - sub_sz[v] + (n - sub_sz[v]);
+			dfs2(v, u);
+		}
+	};
+
+	dfs1(0, -1);
+	ans[0] = down[0];
+	dfs2(0, -1);
+
+	EACH(x, ans) { pr(x); cout << '\n'; }
+}
+*/
+
+// --- Template structure for custom rerooting ---
+// down[u]  = DP value considering only subtree of u (rooted at 0)
+// ans[u]   = DP value considering entire tree rooted at u
+// Adapt the formulas inside dfs1 and dfs2 for your specific problem.
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,22 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>SCC Condensation Graph (DAG)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: builds a condensation DAG from SCC results. Requires comp[] from kosaraju() or tarjan(). Deduplicates edges. O(V+E).</Description>
+		<Shortcut>grcondense</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Builds condensation DAG. Needs (c, comp) from scc() or tarjan().
+	Graph condense(int c, const vector<int>& comp) {
+		Graph dag(c);
+		F0R(u, n) EACH(v, adj[u])
+			if (comp[u] != comp[v]) dag.add(comp[u], comp[v]);
+		F0R(i, c) { sor(dag.adj[i]); dag.adj[i].erase(unique(all(dag.adj[i])), dag.adj[i].end()); }
+		return dag;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

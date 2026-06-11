@@ -1,0 +1,52 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Bit Manipulation Utilities</Title>
+		<Author>Tempest</Author>
+		<Description>GCC builtin wrappers, common bit tricks, and count of set bits in [1, n] in O(log n).</Description>
+		<Shortcut>gbits</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll n = 13; // binary: 1101
+	pr(Bits::pop(n));     // 3  (popcount)
+	pr(Bits::lg2(n));     // 3  (floor log2)
+	pr(Bits::ls_one(n));  // 1  (lowest set bit value)
+	pr(Bits::count_upto(13)); // total set bits in [1..13]
+}
+*/
+
+namespace Bits {
+	// --- Builtin wrappers ---
+	int pop(ll x)    { return __builtin_popcountll(x); }
+	int parity(ll x) { return __builtin_parityll(x); }
+	int clz(ll x)    { return x ? __builtin_clzll(x) : 64; }
+	int ctz(ll x)    { return x ? __builtin_ctzll(x) : 64; }
+	int lg2(ll x)    { return x ? 63 - __builtin_clzll(x) : -1; }  // floor(log2(x)), -1 for x=0
+	int width(ll x)  { return x ? 64 - __builtin_clzll(x) : 0; }   // bits needed to represent x
+
+	// --- Common tricks ---
+	ll ls_one(ll x)            { return x & -x; }          // isolate lowest set bit
+	ll clear_ls_one(ll x)      { return x & (x - 1); }     // turn off lowest set bit
+	ll clear_trailing_ones(ll x){ return x & (x + 1); }    // turn off trailing 1s
+	ll bit_ceil(ll x)          { return x <= 1 ? 1 : 1LL << (64 - __builtin_clzll(x - 1)); }
+	bool is_pow2(ll x)         { return x > 0 && !(x & (x - 1)); }
+
+	// --- Count set bits in [1, n], O(log n) ---
+	ll count_upto(ll n) {
+		ll cnt = 0;
+		while (n > 0) {
+			int x = width(n) - 1;
+			if (x > 0) cnt += (ll)x << (x - 1); // full blocks [0, 2^x)
+			n -= 1LL << x;
+			cnt += n + 1; // MSBs in [2^x, n]
+		}
+		return cnt;
+	}
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,55 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>LIS — Longest Increasing Subsequence</Title>
+		<Author>Tempest</Author>
+		<Description>O(N log N) LIS length via patience sorting. Also reconstructs the actual subsequence. Change lower_bound to upper_bound for non-strictly increasing LIS.</Description>
+		<Shortcut>dplis</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	pr(lis_len(a)); cout << '\n';
+
+	auto seq = lis_seq(a);
+	pr(seq); cout << '\n';
+}
+*/
+
+// Returns length of strictly increasing LIS
+int lis_len(const vi& a) {
+	vi tails;
+	EACH(x, a) {
+		auto it = lower_bound(all(tails), x); // change to upper_bound for non-strict
+		if (it == tails.end()) tails.push_back(x);
+		else *it = x;
+	}
+	return sz(tails);
+}
+
+// Returns one actual LIS sequence
+vi lis_seq(const vi& a) {
+	int n = sz(a);
+	vi tails, idx, par(n, -1);
+	vector<int> pos; // pos[i] = index in a[] of tails[i]
+
+	F0R(i, n) {
+		int p = int(lower_bound(all(tails), a[i]) - tails.begin());
+		if (p == sz(tails)) { tails.push_back(a[i]); pos.push_back(i); }
+		else { tails[p] = a[i]; pos[p] = i; }
+		par[i] = (p > 0) ? pos[p-1] : -1;
+	}
+
+	vi res;
+	for (int i = pos.back(); i != -1; i = par[i]) res.push_back(a[i]);
+	reverse(all(res));
+	return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

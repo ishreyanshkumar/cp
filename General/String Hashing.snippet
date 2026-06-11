@@ -1,0 +1,54 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>String Hashing (Double Hash)</Title>
+		<Author>Tempest</Author>
+		<Description>Double-hash polynomial rolling hash for O(1) substring equality checks with very low collision probability. Use two independent (mod, base) pairs to avoid anti-hash tests.</Description>
+		<Shortcut>ghash</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	Hash h(s);
+
+	int l1, r1, l2, r2; re(l1, r1, l2, r2); // 0-based inclusive
+	pr(h.eq(l1, r1, l2, r2) ? "Equal" : "Diff");
+}
+*/
+
+struct Hash {
+	using ull = unsigned long long;
+	static const ull M1 = (1ULL<<61)-1, P1 = 131;
+	static const ull M2 = 1e9+9,        P2 = 137;
+
+	int n;
+	vector<ull> h1, h2, pw1, pw2;
+
+	ull mod1(ull a) { return (a >> 61) + (a & M1) > M1 ? (a >> 61) + (a & M1) - M1 : (a >> 61) + (a & M1); }
+	ull mul1(ull a, ull b) { return mod1((__uint128_t)a * b); }
+
+	Hash(const string& s) : n(sz(s)), h1(n+1), h2(n+1), pw1(n+1), pw2(n+1) {
+		pw1[0] = pw2[0] = 1;
+		F0R(i, n) {
+			ull c = s[i] - 'a' + 1;
+			pw1[i+1] = mul1(pw1[i], P1);
+			pw2[i+1] = pw2[i] * P2 % M2;
+			h1[i+1]  = mod1(mul1(h1[i], P1) + c);
+			h2[i+1]  = (h2[i] * P2 + c) % M2;
+		}
+	}
+
+	pair<ull,ull> get(int l, int r) { // inclusive 0-based
+		ull v1 = mod1(h1[r+1] + M1 - mul1(h1[l], pw1[r-l+1]));
+		ull v2 = (h2[r+1] + M2 - h2[l] * pw2[r-l+1] % M2) % M2;
+		return {v1, v2};
+	}
+
+	bool eq(int l1, int r1, int l2, int r2) { return get(l1,r1) == get(l2,r2); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

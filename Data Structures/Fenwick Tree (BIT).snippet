@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Fenwick Tree (BIT)</Title>
+		<Author>Tempest</Author>
+		<Description>Binary Indexed Tree for point update and prefix/range sum queries. 0-based public API. O(log N) per operation.</Description>
+		<Shortcut>dsbit</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+
+	BIT<ll> bit(n);
+	F0R(i, n) bit.add(i, a[i]); // build
+
+	while (q--) {
+		int t; re(t);
+		if (t == 1) { int i; ll v; re(i, v); bit.add(i, v); }
+		else        { int l, r; re(l, r); pr(bit.query(l, r)); cout << '\n'; }
+	}
+}
+*/
+
+template<class T> struct BIT {
+	int n; vector<T> v;
+	BIT(int _n) : n(_n), v(n + 1, T{}) {}
+
+	// Add d to index i (0-based)
+	void add(int i, T d) { for (++i; i <= n; i += i & -i) v[i] += d; }
+
+	// Prefix sum [0, i] (0-based, inclusive)
+	T query(int i) { T s{}; for (++i; i > 0; i -= i & -i) s += v[i]; return s; }
+
+	// Range sum [l, r] (0-based, inclusive)
+	T query(int l, int r) { return l > r ? T{} : query(r) - (l ? query(l - 1) : T{}); }
+
+	// Point-set (for initially 0 BIT only): set index i to val
+	void set(int i, T val) { add(i, val - query(i, i)); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

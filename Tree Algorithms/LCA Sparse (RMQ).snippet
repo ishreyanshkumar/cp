@@ -1,0 +1,68 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>LCA via Euler Tour + Sparse Table (O(1) Query)</Title>
+		<Author>Graphest</Author>
+		<Description>O(N log N) build, O(1) LCA query using Euler tour flattening and sparse table RMQ. Faster query than binary lifting when LCA is called very frequently (e.g. inside another O(N) loop).</Description>
+		<Shortcut>trlcarmq</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	Graph G(n); G.read(n-1, false);
+	LCARMQ lca(G);
+	int u, v; re(u, v); u--; v--;
+	pr(lca.get(u, v));
+	pr(lca.dist(u, v));
+}
+*/
+
+struct LCARMQ {
+	int n;
+	vi depth, first; // first[u] = first position of u in euler tour
+	vector<pair<int,int>> tour; // {depth, node}
+	vector<vector<pair<int,int>>> sp; // sparse table on tour
+	vector<int> lg;
+
+	LCARMQ(const Graph& G, int root=0) : n(G.n), depth(G.n,0), first(G.n) {
+		// Build Euler tour
+		function<void(int,int)> dfs = [&](int u, int p) {
+			first[u] = sz(tour);
+			tour.push_back({depth[u], u});
+			EACH(v, G.adj[u]) if (v != p) {
+				depth[v] = depth[u] + 1;
+				dfs(v, u);
+				tour.push_back({depth[u], u});
+			}
+		};
+		dfs(root, -1);
+
+		// Build sparse table on tour (size 2N-1)
+		int m = sz(tour);
+		lg.resize(m+1); lg[1]=0;
+		FOR(i,2,m+1) lg[i] = lg[i/2]+1;
+		sp.assign(lg[m]+1, tour);
+		for (int j=1; (1<<j)<=m; j++)
+			for (int i=0; i+(1<<j)<=m; i++)
+				sp[j][i] = min(sp[j-1][i], sp[j-1][i+(1<<(j-1))]);
+	}
+
+	pair<int,int> rmq(int l, int r) { // min on tour[l..r]
+		int k = lg[r-l+1];
+		return min(sp[k][l], sp[k][r-(1<<k)+1]);
+	}
+
+	int get(int u, int v) {
+		int l=first[u], r=first[v];
+		if (l>r) swap(l,r);
+		return rmq(l,r).second;
+	}
+
+	int dist(int u, int v) { return depth[u]+depth[v]-2*depth[get(u,v)]; }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

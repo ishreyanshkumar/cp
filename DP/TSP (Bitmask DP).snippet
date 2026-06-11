@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>TSP — Traveling Salesperson (Bitmask DP)</Title>
+		<Author>Tempest</Author>
+		<Description>Minimum cost to visit all N nodes and return to start. dp[mask][u] = min cost to have visited exactly the nodes in 'mask', ending at u. Time: O(N^2 * 2^N).</Description>
+		<Shortcut>dptsp</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vector<vi> dist(n, vi(n)); re(dist); // dist[u][v]
+	pr(tsp(n, dist));
+}
+*/
+
+ll tsp(int n, const vector<vi>& dist) {
+	if (n == 1) return 0;
+	vector<vector<ll>> dp(1 << n, vector<ll>(n, BIG));
+	dp[1][0] = 0; // start at node 0
+
+	FOR(mask, 1, 1 << n) {
+		F0R(u, n) {
+			if (!(mask & (1 << u)) || dp[mask][u] == BIG) continue;
+			F0R(v, n) {
+				if (!(mask & (1 << v)) && dist[u][v] != BIG) {
+					int nxt = mask | (1 << v);
+					dp[nxt][v] = min(dp[nxt][v], dp[mask][u] + dist[u][v]);
+				}
+			}
+		}
+	}
+
+	ll ans = BIG;
+	FOR(u, 1, n) {
+		if (dp[(1<<n)-1][u] != BIG && dist[u][0] != BIG)
+			ans = min(ans, dp[(1<<n)-1][u] + dist[u][0]);
+	}
+	return ans;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

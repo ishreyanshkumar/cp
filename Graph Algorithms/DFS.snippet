@@ -1,0 +1,33 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>DFS (Component Traversal + Path)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: recursive DFS with visited array and parent tracking for component traversal or path reconstruction. O(V+E).</Description>
+		<Shortcut>grdfs</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<int> vis, par;
+
+	void _dfs(int u) {
+		vis[u] = 1;
+		EACH(v, adj[u]) if (!vis[v]) { par[v] = u; _dfs(v); }
+	}
+
+	void dfs(int s) {
+		vis.assign(n, 0); par.assign(n, -1);
+		_dfs(s);
+	}
+
+	// Returns path from DFS source to x, or {} if not visited
+	vector<int> get_path(int x) {
+		if (vis.empty() || !vis[x]) return {};
+		vector<int> res;
+		for (; x != -1; x = par[x]) res.push_back(x);
+		reverse(all(res)); return res;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

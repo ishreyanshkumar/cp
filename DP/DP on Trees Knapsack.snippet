@@ -1,0 +1,58 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Tree Knapsack DP</Title>
+		<Author>Tempest</Author>
+		<Description>Select at most K nodes from a rooted tree to maximise total value, subject to: if a node is selected its parent must be selected too (dependency constraint). O(N*K) with careful merging. Classic "tree knapsack" / "选课" problem.</Description>
+		<Shortcut>dptreeknap</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, K; re(n, K);
+	vi val(n); re(val);
+	Graph G(n); G.read(n-1, false); // rooted at 0, or use virtual root
+
+	pr(tree_knapsack(G, val, K, 0));
+}
+*/
+
+// Returns max value when selecting at most K nodes (root must be selected if any child is).
+// dp[u][j] = max value in subtree of u when selecting j nodes including u itself.
+ll tree_knapsack(const Graph& G, const vi& val, int K, int root) {
+	int n = G.n;
+	vector<vi> dp(n);
+
+	function<void(int,int)> dfs = [&](int u, int p) {
+		dp[u] = {0, val[u]}; // dp[u][0]=0 (don't take), dp[u][1]=val[u] (take u)
+		EACH(v, G.adj[u]) {
+			if (v == p) continue;
+			dfs(v, u);
+			// Merge child v into u: O(sz_u * sz_v)
+			int su = sz(dp[u]), sv = sz(dp[v]);
+			vi ndp(min(su + sv - 1, K + 1), 0);
+			F0R(j, su) if (dp[u][j]) {
+				F0R(k, sv) {
+					if (j + k >= sz(ndp)) break;
+					// j nodes from u's current, k nodes from v's subtree
+					// k==0: don't take any from v (ok)
+					// k>=1: must include v itself (dp[v][k] already accounts for this)
+					ndp[j+k] = max(ndp[j+k], dp[u][j] + dp[v][k]);
+				}
+			}
+			dp[u] = ndp;
+		}
+		// dp[u][0] should stay 0 (selecting 0 nodes from subtree including not taking u)
+		// But u must be taken if we take any child, so dp[u][j>=1] includes u's value.
+	};
+	dfs(root, -1);
+
+	ll ans = 0;
+	F0R(j, min(K+1, sz(dp[root]))) ans = max(ans, dp[root][j]);
+	return ans;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

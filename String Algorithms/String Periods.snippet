@@ -1,0 +1,69 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>String Periods and Borders</Title>
+		<Author>Tempest</Author>
+		<Description>Uses KMP failure function to find: all periods of a string, all borders (prefix = suffix), and whether s is a rotation of t. O(N) per query. A period p means s[i] == s[i+p] for all valid i.</Description>
+		<Shortcut>strperiod</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	auto periods = all_periods(s);
+	EACH(p, periods) pr(p); cout << '\n'; // all periods in increasing order
+
+	auto borders = all_borders(s);
+	EACH(b, borders) pr(b); cout << '\n'; // all border lengths > 0
+
+	string t; re(t);
+	pr(is_rotation(s, t) ? "YES" : "NO");
+}
+*/
+
+// KMP failure function
+vector<int> kmp_fail(const string& s) {
+	int n=sz(s);
+	vector<int> f(n,0);
+	for (int i=1;i<n;i++) {
+		int j=f[i-1];
+		while(j&&s[i]!=s[j]) j=f[j-1];
+		if(s[i]==s[j]) j++;
+		f[i]=j;
+	}
+	return f;
+}
+
+// All periods p of s: s has period p if s[i]==s[i%p] for all i.
+// Equivalently: p is a period iff n % p == 0 and the KMP period divides p.
+vector<int> all_periods(const string& s) {
+	int n=sz(s);
+	auto f = kmp_fail(s);
+	vector<int> res;
+	// Smallest period = n - f[n-1]
+	int p = n - f[n-1];
+	for (int per=p; per<=n; per+=p)
+		if (n % per == 0) res.push_back(per);
+	return res;
+}
+
+// All border lengths of s (non-empty proper prefix that is also a suffix)
+vector<int> all_borders(const string& s) {
+	auto f = kmp_fail(s);
+	vector<int> res;
+	for (int b=f[sz(s)-1]; b>0; b=f[b-1]) res.push_back(b);
+	reverse(all(res));
+	return res;
+}
+
+// Is s a rotation of t?
+bool is_rotation(const string& s, const string& t) {
+	if (sz(s)!=sz(t)) return false;
+	string u = t+t;
+	return !kmp(u,s).empty(); // reuse kmp() from str_kmp snippet
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,60 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>SOS DP (Sum over Subsets)</Title>
+		<Author>Tempest</Author>
+		<Description>Computes f[mask] = sum of a[submask] for all submasks of mask. O(N * 2^N). Essential for subset convolution, AND/OR convolution, and counting problems over all subsets.</Description>
+		<Shortcut>dpsos</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n); // n bits
+	vector<ll> a(1 << n); re(a); // values for each mask
+
+	// f[mask] = sum of a[sub] for all sub that are submasks of mask
+	auto f = sos_sum(n, a);
+	pr(f);
+
+	// f2[mask] = sum of a[sup] for all sup that are supermasks of mask
+	auto f2 = sos_sum_super(n, a);
+	pr(f2);
+}
+*/
+
+// Sum over subsets: f[mask] = sum_{sub ⊆ mask} a[sub]
+vector<ll> sos_sum(int n, vector<ll> f) {
+	F0R(i, n)
+		FOR(mask, 0, 1 << n)
+			if (mask >> i & 1)
+				f[mask] += f[mask ^ (1 << i)];
+	return f;
+}
+
+// Sum over supersets: f[mask] = sum_{mask ⊆ sup} a[sup]
+vector<ll> sos_sum_super(int n, vector<ll> f) {
+	F0R(i, n)
+		FOR(mask, 0, 1 << n)
+			if (!(mask >> i & 1))
+				f[mask] += f[mask | (1 << i)];
+	return f;
+}
+
+// AND convolution: c[mask] = sum_{a & b == mask} f[a]*g[b]
+// Equivalent to: zeta-transform both, multiply pointwise, inverse zeta.
+vector<ll> and_conv(int n, vector<ll> f, vector<ll> g) {
+	f = sos_sum_super(n, f); // zeta (AND)
+	g = sos_sum_super(n, g);
+	F0R(mask, 1 << n) f[mask] *= g[mask];
+	// Mobius inversion (AND)
+	F0R(i, n)
+		FOR(mask, 0, 1 << n)
+			if (!(mask >> i & 1))
+				f[mask] -= f[mask | (1 << i)];
+	return f;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

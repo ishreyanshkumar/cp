@@ -1,0 +1,37 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>SPFA (Shortest Path Faster Algorithm)</Title>
+		<Author>Graphest</Author>
+		<Description>WGraph plugin: Shortest Path Faster Algorithm — Bellman-Ford with a queue. Handles negative edges. Returns {has_neg_cycle, dist[]}. Average O(E), worst O(VE).</Description>
+		<Shortcut>grspfa</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Returns {has_negative_cycle, distances}
+	pair<bool, vector<ll>> spfa(int s) {
+		vector<ll>   d(n, BIG);
+		vector<int>  cnt(n, 0);
+		vector<bool> in_q(n, false);
+		queue<int> q;
+		d[s] = 0; q.push(s); in_q[s] = true;
+
+		while (!q.empty()) {
+			int u = q.front(); q.pop(); in_q[u] = false;
+			EACH(e, adj[u]) {
+				auto [v, w] = e;
+				if (d[u] + w < d[v]) {
+					d[v] = d[u] + w;
+					if (!in_q[v]) {
+						q.push(v); in_q[v] = true;
+						if (++cnt[v] >= n) return {true, d}; // negative cycle
+					}
+				}
+			}
+		}
+		return {false, d};
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,56 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>DSU with Rollback (Offline)</Title>
+		<Author>Tempest</Author>
+		<Description>DSU with union-by-size and O(log N) rollback. No path compression. Used for offline dynamic connectivity via divide-and-conquer. O(log N) per unite/rollback.</Description>
+		<Shortcut>dsdsurb</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	DSURollback dsu(n);
+
+	// Save state, make changes, then rollback
+	int snap = dsu.save();
+	dsu.unite(u, v);
+	// ... queries ...
+	dsu.rollback(snap);
+}
+*/
+
+struct DSURollback {
+	vector<int> p, sz;
+	vector<pair<int&,int>> hist; // {ref, old_val}
+
+	DSURollback(int n) : p(n), sz(n, 1) { iota(all(p), 0); }
+
+	int find(int x) { return p[x] == x ? x : find(p[x]); }
+
+	// Returns false if already same component
+	bool unite(int x, int y) {
+		x = find(x); y = find(y);
+		if (x == y) return false;
+		if (sz[x] < sz[y]) swap(x, y);
+		hist.push_back({p[y], p[y]});
+		hist.push_back({sz[x], sz[x]});
+		p[y] = x; sz[x] += sz[y];
+		return true;
+	}
+
+	bool same(int x, int y) { return find(x) == find(y); }
+	int  size(int x)        { return sz[find(x)]; }
+
+	int  save()             { return sz(hist); }
+	void rollback(int snap) {
+		while (sz(hist) > snap) {
+			hist.back().first = hist.back().second;
+			hist.pop_back();
+		}
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

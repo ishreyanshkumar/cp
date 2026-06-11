@@ -1,0 +1,68 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Max Flow — Dinic's Algorithm</Title>
+		<Author>Graphest</Author>
+		<Description>Max flow via BFS level graph and DFS with current-arc optimization. O(V^2 * E) general; O(E * sqrt(V)) for unit-capacity graphs. Standalone struct (not a plugin).</Description>
+		<Shortcut>grmaxflow</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m, s, t; re(n, m, s, t); s--; t--;
+	Dinic dn(n);
+	F0R(i, m) { int u, v; ll c; re(u, v, c); dn.add_edge(u-1, v-1, c); }
+	pr(dn.max_flow(s, t));
+}
+*/
+
+struct Dinic {
+	struct Edge { int to, rev; ll cap; };
+	int n;
+	vector<vector<Edge>> adj;
+	vector<int> level, ptr;
+
+	Dinic(int _n) : n(_n), adj(n), level(n), ptr(n) {}
+
+	void add_edge(int u, int v, ll cap) {
+		adj[u].push_back({v, sz(adj[v]), cap});
+		adj[v].push_back({u, sz(adj[u])-1, 0});
+	}
+
+	bool bfs(int s, int t) {
+		fill(all(level), -1); level[s] = 0;
+		queue<int> q; q.push(s);
+		while (!q.empty()) {
+			int u = q.front(); q.pop();
+			EACH(e, adj[u]) if (e.cap > 0 && level[e.to] == -1) {
+				level[e.to] = level[u] + 1; q.push(e.to);
+			}
+		}
+		return level[t] != -1;
+	}
+
+	ll dfs(int u, int t, ll pushed) {
+		if (u == t || !pushed) return pushed;
+		for (int& i = ptr[u]; i < sz(adj[u]); i++) {
+			Edge& e = adj[u][i];
+			if (e.cap <= 0 || level[e.to] != level[u]+1) continue;
+			ll d = dfs(e.to, t, min(pushed, e.cap));
+			if (d > 0) { e.cap -= d; adj[e.to][e.rev].cap += d; return d; }
+		}
+		return 0;
+	}
+
+	ll max_flow(int s, int t) {
+		ll flow = 0;
+		while (bfs(s, t)) {
+			fill(all(ptr), 0);
+			while (ll d = dfs(s, t, BIG)) flow += d;
+		}
+		return flow;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

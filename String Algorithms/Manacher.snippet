@@ -1,0 +1,47 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Manacher's Algorithm (Longest Palindromic Substring)</Title>
+		<Author>Tempest</Author>
+		<Description>Finds the longest palindromic substring and the palindrome radius at every centre in O(N). p[i] = radius of longest palindrome centred at i in the transformed string (odd and even lengths both handled).</Description>
+		<Shortcut>strmanacher</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	auto p = manacher(s);
+
+	// Longest palindromic substring length
+	int best = *max_element(all(p));
+	pr(best); cout << '\n';
+
+	// All palindromes centred at original index i (0-based):
+	// Odd  palindromes: radius p[2*i+1] (length 2*p[2*i+1]-1)
+	// Even palindromes: radius p[2*i+2] (length 2*p[2*i+2])
+}
+*/
+
+// Transforms s -> #s[0]#s[1]#...s[n-1]# and computes palindrome radii.
+// p[i] = radius including centre (p[i]==1 means single char / empty).
+// Palindrome length in original string = p[i] - 1.
+vector<int> manacher(const string& s) {
+	string t = "#";
+	for (char c : s) { t += c; t += '#'; }
+	int n = sz(t);
+	vector<int> p(n, 0);
+	int c = 0, r = 0;
+	F0R(i, n) {
+		int mirror = 2 * c - i;
+		if (i < r) p[i] = min(r - i, p[mirror]);
+		while (i - p[i] - 1 >= 0 && i + p[i] + 1 < n && t[i - p[i] - 1] == t[i + p[i] + 1])
+			p[i]++;
+		if (i + p[i] > r) { c = i; r = i + p[i]; }
+	}
+	return p;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

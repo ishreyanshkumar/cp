@@ -1,0 +1,76 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Convex Hull Trick (CHT)</Title>
+		<Author>Tempest</Author>
+		<Description>Optimizes DP transitions of the form dp[i] = min(dp[j] + b[j]*x[i]) from O(N^2) to O(N log N) (Li Chao tree version, supports arbitrary query order) or O(N) (monotone deque version). Use Li Chao for general queries; deque for sorted queries.</Description>
+		<Shortcut>dpcht</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage (Li Chao tree) ---
+void solve() {
+	// dp[i] = min over j<i of { dp[j] + cost(j,i) }
+	// where cost(j,i) = b[j] * x[i] + c[j]  (line: y = m*x + b)
+	int n; re(n);
+	vi a(n); re(a);
+
+	LiChaoTree lct(-1e9, 1e9); // query range [lo, hi]
+	ll dp0 = 0;
+	lct.add_line(a[0], dp0); // line with slope=a[0], intercept=dp0
+
+	vi dp(n, BIG);
+	FOR(i, 1, n) {
+		dp[i] = lct.query(a[i]); // min value at x = a[i]
+		lct.add_line(a[i], dp[i]); // add line slope=a[i], intercept=dp[i]
+	}
+	pr(dp[n-1]);
+}
+*/
+
+// Li Chao Segment Tree: supports add_line(m, b) and query_min(x).
+// Works for arbitrary (unsorted) query order. O(log(range)) per op.
+struct LiChaoTree {
+	struct Line { ll m, b; ll eval(ll x) const { return m * x + b; } };
+	struct Node { Line line; int l, r; };
+
+	ll lo, hi;
+	vector<Node> t;
+	const Line NONE = {0, BIG};
+
+	LiChaoTree(ll _lo, ll _hi) : lo(_lo), hi(_hi) {
+		t.push_back({NONE, 0, 0});
+	}
+
+	void add_line(ll m, ll b, int v, ll tl, ll tr) {
+		ll tm = (tl + tr) / 2;
+		bool left_better  = Line{m,b}.eval(tl) < t[v].line.eval(tl);
+		bool mid_better   = Line{m,b}.eval(tm) < t[v].line.eval(tm);
+		if (mid_better) swap(t[v].line, Line{m, b}), swap(m, t[v].line.m), swap(b, t[v].line.b);
+		if (tl == tr) return;
+		if (left_better != mid_better) {
+			if (!t[v].l) { t.push_back({NONE,0,0}); t[v].l = sz(t)-1; }
+			add_line(m, b, t[v].l, tl, tm);
+		} else {
+			if (!t[v].r) { t.push_back({NONE,0,0}); t[v].r = sz(t)-1; }
+			add_line(m, b, t[v].r, tm+1, tr);
+		}
+	}
+
+	void add_line(ll m, ll b) { add_line(m, b, 0, lo, hi); }
+
+	ll query(ll x, int v, ll tl, ll tr) {
+		ll res = t[v].line.eval(x);
+		if (tl == tr) return res;
+		ll tm = (tl + tr) / 2;
+		if (x <= tm && t[v].l) return min(res, query(x, t[v].l, tl, tm));
+		if (x >  tm && t[v].r) return min(res, query(x, t[v].r, tm+1, tr));
+		return res;
+	}
+
+	ll query(ll x) { return query(x, 0, lo, hi); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,32 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Catalan Numbers</Title>
+		<Author>Tempest</Author>
+		<Description>Precomputes the first N Catalan numbers mod MOD. C(n) = nCr(2n,n)/(n+1). Counts: valid bracket sequences, BSTs, triangulations, monotone paths, etc. Requires ModComb (g_modcomb).</Description>
+		<Shortcut>gcatalan</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ModComb mc(400000);
+	int n; re(n);
+	// C(n) = C(2n, n) / (n+1)
+	ll cat = mc.nCr(2*n, n) * BinPow::get(n+1, MOD-2) % MOD;
+	pr(cat);
+}
+*/
+
+// Precompute first maxN Catalan numbers using the recurrence C(n) = C(2n,n)/(n+1)
+vi catalan_numbers(int maxN) {
+	ModComb mc(2 * maxN);
+	vi cat(maxN + 1);
+	F0R(n, maxN + 1)
+		cat[n] = mc.nCr(2*n, n) * BinPow::get(n+1, MOD-2) % MOD;
+	return cat;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

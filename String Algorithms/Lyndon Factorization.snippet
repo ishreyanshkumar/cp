@@ -1,0 +1,48 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Lyndon Factorization (Duval's Algorithm)</Title>
+		<Author>Tempest</Author>
+		<Description>Decomposes a string into a non-increasing sequence of Lyndon words (aperiodic strings that are lexicographically smallest in their rotation class) in O(N) time and O(1) space. Also computes the minimum rotation of a string.</Description>
+		<Shortcut>strlyndon</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+
+	auto factors = lyndon_factorize(s);
+	EACH(f, factors) pr(f); cout << '\n'; // Lyndon words
+
+	pr(min_rotation(s)); // 0-based start index of lexicographically smallest rotation
+}
+*/
+
+// Returns list of Lyndon factors (each is a substring of s)
+vector<string> lyndon_factorize(const string& s) {
+	vector<string> res;
+	int n=sz(s), i=0;
+	while (i<n) {
+		int j=i, k=i+1;
+		while (k<n && s[j]<=s[k]) { if(s[j]<s[k]) j=i; else j++; k++; }
+		while (i<=j) { res.push_back(s.substr(i, k-j)); i+=k-j; }
+	}
+	return res;
+}
+
+// Returns 0-based start index of lexicographically smallest rotation
+int min_rotation(const string& s) {
+	string t = s+s;
+	int n=sz(s), i=0, ans=0;
+	while (i<n) {
+		ans=i; int j=i,k=i+1;
+		while (k<2*n && t[j]<=t[k]) { if(t[j]<t[k]) j=i; else j++; k++; }
+		while (i<=j) i+=k-j;
+	}
+	return ans % n;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

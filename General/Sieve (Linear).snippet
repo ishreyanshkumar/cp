@@ -1,0 +1,77 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Linear Sieve (SPF + Euler Phi)</Title>
+		<Author>Tempest</Author>
+		<Description>O(N) sieve computing smallest prime factor and Euler's totient for all numbers up to N. Supports O(log x) factorization, divisor generation, and prime check.</Description>
+		<Shortcut>gsieve</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	Sieve s(20);
+	int x; re(x);
+
+	if (s.is_prime(x)) pr(x, "is prime\n");
+
+	// 12 -> [(2,2),(3,1)]
+	for (auto [p, e] : s.factorize(x)) pr(p, '^', e, ' ');
+	cout << '\n';
+
+	// 12 -> [1,2,3,4,6,12]
+	pr(s.get_divisors(x)); cout << '\n';
+
+	pr(s.phi[x]); cout << '\n'; // Euler's totient
+}
+*/
+
+struct Sieve {
+	int n;
+	vector<int> spf, phi;
+	vector<int> primes;
+
+	Sieve(int _n) : n(_n), spf(n + 1), phi(n + 1) {
+		iota(all(spf), 0);
+		phi[1] = 1;
+		FOR(i, 2, n + 1) {
+			if (spf[i] == i) { primes.push_back(i); phi[i] = i - 1; }
+			EACH(p, primes) {
+				if (p > spf[i] || (ll)i * p > n) break;
+				spf[i * p] = p;
+				phi[i * p] = (spf[i] == p) ? phi[i] * p : phi[i] * (p - 1);
+			}
+		}
+	}
+
+	bool is_prime(int x) { return x > 1 && spf[x] == x; }
+
+	// O(log x): returns {prime, exponent} pairs
+	vector<pi> factorize(int x) {
+		vector<pi> res;
+		while (x > 1) {
+			int p = spf[x], e = 0;
+			while (x % p == 0) { x /= p; e++; }
+			res.push_back({p, e});
+		}
+		return res;
+	}
+
+	// Returns sorted list of all divisors
+	vector<ll> get_divisors(int x) {
+		auto facts = factorize(x);
+		vector<ll> divs = {1};
+		EACH(f, facts) {
+			int m = sz(divs); ll pw = 1;
+			F0R(j, f.second) {
+				pw *= f.first;
+				F0R(k, m) divs.push_back(divs[k] * pw);
+			}
+		}
+		sor(divs); return divs;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

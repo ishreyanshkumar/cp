@@ -1,0 +1,62 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>2D Geometry (Point + Convex Hull)</Title>
+		<Author>Tempest</Author>
+		<Description>2D integer point with operators, dot product (*), cross product (%), squared norm, orientation test, and convex hull.</Description>
+		<Shortcut>ggeo</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	P a, b, c; re(a.x, a.y, b.x, b.y, c.x, c.y);
+
+	// Orientation of c relative to directed line a -> b:
+	ll cp = (b - a) % (c - a);
+	if (cp > 0) pr("Left (CCW)");
+	else if (cp < 0) pr("Right (CW)");
+	else pr("Collinear");
+
+	// Convex hull (0-indexed, upper+lower)
+	vector<P> pts; re(pts); // assuming re handles P if adapted
+	auto hull = convex_hull(pts);
+}
+*/
+
+struct P {
+	ll x = 0, y = 0;
+	P operator+(const P& o) const { return {x+o.x, y+o.y}; }
+	P operator-(const P& o) const { return {x-o.x, y-o.y}; }
+	P operator*(ll k)        const { return {x*k, y*k}; }
+	ll operator*(const P& o) const { return x*o.x + y*o.y; } // dot
+	ll operator%(const P& o) const { return x*o.y - y*o.x; } // cross
+	ll sq()                  const { return x*x + y*y; }
+	bool operator<(const P& o) const { return tie(x,y) < tie(o.x,o.y); }
+	bool operator==(const P& o) const { return x==o.x && y==o.y; }
+};
+
+// Andrew's monotone chain: O(n log n), returns hull in CCW order.
+// Collinear points on hull edges are excluded.
+vector<P> convex_hull(vector<P> pts) {
+	int n = sz(pts), k = 0;
+	if (n < 3) return pts;
+	sor(pts);
+	vector<P> H(2 * n);
+	// Lower
+	F0R(i, n) {
+		while (k >= 2 && (H[k-1]-H[k-2]) % (pts[i]-H[k-2]) <= 0) k--;
+		H[k++] = pts[i];
+	}
+	// Upper
+	for (int i = n-2, t = k+1; i >= 0; i--) {
+		while (k >= t && (H[k-1]-H[k-2]) % (pts[i]-H[k-2]) <= 0) k--;
+		H[k++] = pts[i];
+	}
+	H.resize(k - 1);
+	return H;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

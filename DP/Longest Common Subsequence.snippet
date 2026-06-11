@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>LCS (Longest Common Subsequence)</Title>
+		<Author>Tempest</Author>
+		<Description>O(N*M) LCS length with O(min(N,M)) space, plus O(N*M) reconstruction of the actual subsequence. Note: LCS length = N + M - 2*edit_distance if only insertions/deletions are allowed.</Description>
+		<Shortcut>dplcs</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string a, b; re(a, b);
+	pr(lcs_len(a, b));    cout << '\n';
+	pr(lcs_seq(a, b));    cout << '\n';
+}
+*/
+
+int lcs_len(const string& a, const string& b) {
+	int n=sz(a), m=sz(b);
+	vi dp(m+1,0);
+	F0R(i,n) {
+		vi ndp(m+1,0);
+		F0R(j,m) ndp[j+1] = (a[i]==b[j]) ? dp[j]+1 : max(dp[j+1], ndp[j]);
+		dp = ndp;
+	}
+	return dp[m];
+}
+
+string lcs_seq(const string& a, const string& b) {
+	int n=sz(a), m=sz(b);
+	vector<vi> dp(n+1, vi(m+1,0));
+	FOR(i,1,n+1) FOR(j,1,m+1)
+		dp[i][j] = (a[i-1]==b[j-1]) ? dp[i-1][j-1]+1 : max(dp[i-1][j], dp[i][j-1]);
+	string res;
+	for (int i=n,j=m; i>0&&j>0;) {
+		if (a[i-1]==b[j-1]) { res+=a[i-1]; i--; j--; }
+		else if (dp[i-1][j]>dp[i][j-1]) i--;
+		else j--;
+	}
+	reverse(all(res)); return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

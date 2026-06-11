@@ -1,0 +1,41 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Extended Euclidean Algorithm</Title>
+		<Author>Tempest</Author>
+		<Description>Computes Bezout coefficients for ax + by = gcd(a,b) and ax + by + cz = gcd(a,b,c). Time: O(log min(a,b)).</Description>
+		<Shortcut>gexgcd</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll a = 30, b = 12, c = 7;
+
+	auto [x, y, g] = ExGCD::solve(a, b);
+	pr(x, y, g); cout << '\n'; // 1 -2 6  =>  30(1) + 12(-2) = 6
+
+	auto [x3, y3, z3, g3] = ExGCD::solve(a, b, c);
+	pr(x3, y3, z3, g3); cout << '\n';
+}
+*/
+
+struct ExGCD {
+	// 2-var: returns {x, y, g}  where  a*x + b*y = g = gcd(a,b)
+	static array<ll, 3> solve(ll a, ll b) {
+		if (!b) return {1, 0, a};
+		auto [x1, y1, g] = solve(b, a % b);
+		return {y1, x1 - (a / b) * y1, g};
+	}
+
+	// 3-var: returns {x, y, z, g}  where  a*x + b*y + c*z = g = gcd(a,b,c)
+	static array<ll, 4> solve(ll a, ll b, ll c) {
+		auto [u, v, d] = solve(a, b);
+		auto [X, Z, g] = solve(d, c);
+		return {u * X, v * X, Z, g};
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

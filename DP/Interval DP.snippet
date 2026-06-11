@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Interval DP Skeleton</Title>
+		<Author>Tempest</Author>
+		<Description>Classic O(N^3) interval DP. dp[l][r] = optimal value for the subproblem on range [l, r]. Built bottom-up by increasing interval length. Example: minimum cost to multiply a chain of matrices.</Description>
+		<Shortcut>dpinterval</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: minimum cost to parenthesise matrix chain ---
+void solve() {
+	int n; re(n); // n matrices
+	vi dim(n+1); re(dim); // dim[i] x dim[i+1] is size of matrix i
+
+	// cost of multiplying matrix i * (i+1) * ... * j
+	auto cost = [&](int l, int r, int k) {
+		return dim[l] * dim[k+1] * dim[r+1]; // cost of split at k
+	};
+
+	pr(interval_dp(n, cost));
+}
+*/
+
+// cost(l, r, k) = cost of combining [l..k] and [k+1..r]
+// Returns dp[0][n-1], the optimal value for the full range.
+template<class Cost>
+ll interval_dp(int n, Cost cost) {
+	vector<vi> dp(n, vi(n, BIG));
+	F0R(i, n) dp[i][i] = 0; // base: single element
+
+	FOR(len, 2, n+1) {          // interval length
+		F0R(l, n - len + 1) {
+			int r = l + len - 1;
+			FOR(k, l, r) {       // split point
+				if (dp[l][k] != BIG && dp[k+1][r] != BIG)
+					dp[l][r] = min(dp[l][r], dp[l][k] + dp[k+1][r] + cost(l, r, k));
+			}
+		}
+	}
+	return dp[0][n-1];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,31 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Tree DP (Bottom-Up Template)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: bottom-up DP template computing subtree size and height. Adapt dp[] and the merge logic for your specific problem.</Description>
+		<Shortcut>trdp</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vi dp, sub_sz; // dp[u]: e.g. height. sub_sz[u]: subtree size.
+
+	void dfs_dp(int u, int p) {
+		sub_sz[u] = 1;
+		dp[u] = 0; // base case (leaf)
+		EACH(v, adj[u]) {
+			if (v == p) continue;
+			dfs_dp(v, u);
+			sub_sz[u] += sub_sz[v];
+			dp[u] = max(dp[u], 1 + dp[v]); // e.g. height; change merge as needed
+		}
+	}
+
+	void calc_dp(int root = 0) {
+		dp.assign(n, 0); sub_sz.assign(n, 0);
+		dfs_dp(root, -1);
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

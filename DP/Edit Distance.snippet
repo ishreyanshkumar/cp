@@ -1,0 +1,34 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Edit Distance (Levenshtein)</Title>
+		<Author>Tempest</Author>
+		<Description>O(N*M) edit distance (minimum insert/delete/replace operations to transform string a into b). O(min(N,M)) space using rolling arrays.</Description>
+		<Shortcut>dpedit</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string a, b; re(a, b);
+	pr(edit_dist(a, b));
+}
+*/
+
+int edit_dist(const string& a, const string& b) {
+	int n=sz(a), m=sz(b);
+	vi dp(m+1);
+	iota(all(dp), 0);
+	F0R(i,n) {
+		vi ndp(m+1);
+		ndp[0] = i+1;
+		F0R(j,m) ndp[j+1] = (a[i]==b[j]) ? dp[j]
+		          : 1 + min({dp[j], dp[j+1], ndp[j]});
+		dp = ndp;
+	}
+	return dp[m];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

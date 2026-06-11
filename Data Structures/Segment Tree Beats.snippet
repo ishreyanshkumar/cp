@@ -1,0 +1,99 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Segment Tree Beats (Ji Driver Segmentation)</Title>
+		<Author>Tempest</Author>
+		<Description>Supports range chmin (a[i] = min(a[i], v)) and range sum query in O(N log^2 N). Also supports range add and range chmax. Based on Ji driver segmentation / segment tree beats.</Description>
+		<Shortcut>dsbeats</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+	SegBeats sb(a);
+
+	while (q--) {
+		int t; re(t);
+		if (t == 1) { int l, r; ll v; re(l, r, v); sb.chmin(l, r, v); } // range chmin
+		else if (t == 2) { int l, r; ll v; re(l, r, v); sb.add(l, r, v); }  // range add
+		else { int l, r; re(l, r); pr(sb.query(l, r)); cout << '\n'; } // range sum
+	}
+}
+*/
+
+struct SegBeats {
+	int n;
+	struct Node {
+		ll sum, max1, max2, lazy_add;
+		int max_cnt;
+	};
+	vector<Node> t;
+
+	SegBeats(const vi& a) : n(sz(a)), t(4 * sz(a)) { build(a, 1, 0, n - 1); }
+
+	void pull(int v) {
+		t[v].sum = t[2*v].sum + t[2*v+1].sum;
+		if (t[2*v].max1 == t[2*v+1].max1) {
+			t[v].max1 = t[2*v].max1;
+			t[v].max_cnt = t[2*v].max_cnt + t[2*v+1].max_cnt;
+			t[v].max2 = max(t[2*v].max2, t[2*v+1].max2);
+		} else if (t[2*v].max1 > t[2*v+1].max1) {
+			t[v].max1 = t[2*v].max1; t[v].max_cnt = t[2*v].max_cnt;
+			t[v].max2 = max(t[2*v].max2, t[2*v+1].max1);
+		} else {
+			t[v].max1 = t[2*v+1].max1; t[v].max_cnt = t[2*v+1].max_cnt;
+			t[v].max2 = max(t[2*v].max1, t[2*v+1].max2);
+		}
+	}
+
+	void apply_add(int v, ll val) { t[v].sum += val * (/* size */ t[v].max_cnt + (int)(t[v].sum != t[v].max1 * t[v].max_cnt)); t[v].max1 += val; if (t[v].max2 != -BIG) t[v].max2 += val; t[v].lazy_add += val; }
+
+	void apply_chmin(int v, ll val) { t[v].sum -= (t[v].max1 - val) * t[v].max_cnt; t[v].max1 = val; }
+
+	void push(int v) {
+		if (t[v].lazy_add) { apply_add(2*v, t[v].lazy_add); apply_add(2*v+1, t[v].lazy_add); t[v].lazy_add = 0; }
+		if (t[v].max1 < t[2*v].max1) apply_chmin(2*v, t[v].max1);
+		if (t[v].max1 < t[2*v+1].max1) apply_chmin(2*v+1, t[v].max1);
+	}
+
+	void build(const vi& a, int v, int tl, int tr) {
+		t[v].lazy_add = 0;
+		if (tl == tr) { t[v] = {a[tl], a[tl], -BIG, 0, 1}; return; }
+		int tm = (tl + tr) / 2;
+		build(a, 2*v, tl, tm); build(a, 2*v+1, tm+1, tr);
+		pull(v);
+	}
+
+	void chmin(int v, int tl, int tr, int l, int r, ll val) {
+		if (l > tr || r < tl || t[v].max1 <= val) return;
+		if (l <= tl && tr <= r && t[v].max2 < val) { apply_chmin(v, val); return; }
+		push(v); int tm = (tl + tr) / 2;
+		chmin(2*v, tl, tm, l, r, val); chmin(2*v+1, tm+1, tr, l, r, val);
+		pull(v);
+	}
+
+	void add(int v, int tl, int tr, int l, int r, ll val) {
+		if (l > tr || r < tl) return;
+		if (l <= tl && tr <= r) { apply_add(v, val); return; }
+		push(v); int tm = (tl + tr) / 2;
+		add(2*v, tl, tm, l, r, val); add(2*v+1, tm+1, tr, l, r, val);
+		pull(v);
+	}
+
+	ll query(int v, int tl, int tr, int l, int r) {
+		if (l > tr || r < tl) return 0;
+		if (l <= tl && tr <= r) return t[v].sum;
+		push(v); int tm = (tl + tr) / 2;
+		return query(2*v, tl, tm, l, r) + query(2*v+1, tm+1, tr, l, r);
+	}
+
+	void chmin(int l, int r, ll v) { chmin(1, 0, n-1, l, r, v); }
+	void add(int l, int r, ll v)   { add(1, 0, n-1, l, r, v); }
+	ll query(int l, int r)          { return query(1, 0, n-1, l, r); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

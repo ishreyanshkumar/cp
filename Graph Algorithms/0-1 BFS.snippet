@@ -1,0 +1,43 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>0-1 BFS</Title>
+		<Author>Graphest</Author>
+		<Description>SSSP for graphs with edge weights 0 or 1 only. Uses a deque: weight-0 edges push to front, weight-1 to back. O(V+E) — faster than Dijkstra for this special case.</Description>
+		<Shortcut>gr01bfs</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m; re(n, m);
+	WGraph G(n);
+	// Weights must be 0 or 1
+	G.read(m); // directed, 1-indexed
+	auto dist = bfs01(G, 0);
+	F0R(i, n) pr(dist[i] == BIG ? -1 : dist[i]);
+}
+*/
+
+vector<ll> bfs01(const WGraph& G, int s) {
+	vector<ll> dist(G.n, BIG);
+	dist[s] = 0;
+	deque<int> dq;
+	dq.push_back(s);
+	while (!dq.empty()) {
+		int u = dq.front(); dq.pop_front();
+		EACH(e, G.adj[u]) {
+			auto [v, w] = e;
+			if (dist[u] + w < dist[v]) {
+				dist[v] = dist[u] + w;
+				if (w == 0) dq.push_front(v);
+				else        dq.push_back(v);
+			}
+		}
+	}
+	return dist;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

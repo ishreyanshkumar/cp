@@ -1,0 +1,57 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Sqrt Decomposition (Block Array)</Title>
+		<Author>Tempest</Author>
+		<Description>O(sqrt(N)) point update and range query using block decomposition. Simpler than segment trees; good for offline transformations and when constant factor matters. Adapt merge() for sum/min/max/gcd.</Description>
+		<Shortcut>gsqrt</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+	SqrtDecomp sq(a);
+
+	while (q--) {
+		int t; re(t);
+		if (t == 1) { int i; ll v; re(i, v); sq.update(i, v); }
+		else        { int l, r; re(l, r); pr(sq.query(l, r)); cout << '\n'; }
+	}
+}
+*/
+
+struct SqrtDecomp {
+	int n, B;
+	vi a, block;
+
+	ll merge(ll x, ll y) { return x + y; } // change: min, max, gcd, xor
+	const ll ID = 0;                        // identity for merge
+
+	SqrtDecomp(const vi& _a) : n(sz(_a)), B(max(1,(int)sqrt(n))), a(_a), block((n+B-1)/B, ID) {
+		F0R(i, n) block[i/B] = merge(block[i/B], a[i]);
+	}
+
+	void update(int i, ll val) {
+		// Recompute block from scratch (handles replace, not add)
+		a[i] = val;
+		int b = i / B;
+		block[b] = ID;
+		FOR(j, b*B, min(n, (b+1)*B)) block[b] = merge(block[b], a[j]);
+	}
+
+	ll query(int l, int r) { // 0-based inclusive
+		ll res = ID;
+		int bl = l/B, br = r/B;
+		if (bl == br) { FOR(i, l, r+1) res = merge(res, a[i]); return res; }
+		FOR(i, l, (bl+1)*B)   res = merge(res, a[i]);
+		FOR(b, bl+1, br)       res = merge(res, block[b]);
+		FOR(i, br*B, r+1)      res = merge(res, a[i]);
+		return res;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

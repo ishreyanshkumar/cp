@@ -1,0 +1,36 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Eulerian Circuit — Hierholzer's Algorithm</Title>
+		<Author>Graphest</Author>
+		<Description>Finds Eulerian circuit or path on an undirected graph using Hierholzer's algorithm. Requires WGraph where edge weight = unique edge id [0..m-1]. Returns empty if no Eulerian circuit exists.</Description>
+		<Shortcut>greuler</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Requires WGraph with w = unique edge index in [0, m).
+	// Returns Eulerian circuit starting at start_node, or {} if impossible.
+	vi euler_circuit(int m, int start_node = 0) {
+		// Check: all degrees must be even
+		vector<int> deg(n, 0);
+		F0R(u, n) EACH(e, adj[u]) deg[u]++;
+		F0R(i, n) if (deg[i] & 1) return {};
+
+		vi path;
+		vector<bool> used(m, false);
+		function<void(int)> dfs = [&](int u) {
+			while (!adj[u].empty()) {
+				auto [v, id] = adj[u].back(); adj[u].pop_back();
+				if (used[id]) continue;
+				used[id] = true; dfs(v);
+			}
+			path.push_back(u);
+		};
+		dfs(start_node);
+		if (sz(path) != m + 1) return {};
+		reverse(all(path)); return path;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

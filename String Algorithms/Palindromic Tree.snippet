@@ -1,0 +1,74 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Palindromic Tree (EERTREE)</Title>
+		<Author>Tempest</Author>
+		<Description>Builds the palindromic tree (eertree) online in O(N). Nodes represent distinct palindromic substrings. Supports: count of distinct palindromic substrings, occurrences of each, and the number of palindromic suffixes at each position.</Description>
+		<Shortcut>strpalindtree</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	PalindTree pt(s);
+	pr(pt.distinct_palindromes()); cout << '\n';
+	// pt.nodes[i].cnt = occurrences of i-th palindrome after propagation
+	pt.propagate();
+	// pt.nodes[i].len = length of i-th palindrome (nodes 0,1 are sentinels)
+}
+*/
+
+struct PalindTree {
+	struct Node {
+		map<char,int> ch;
+		int suf, len;
+		ll cnt = 0;
+	};
+	vector<Node> t;
+	string s;
+	int last;
+
+	PalindTree() { init(); }
+	PalindTree(const string& _s) { init(); EACH(c,_s) add(c); }
+
+	void init() {
+		t.push_back({{}, 0, -1}); // root1: odd root (len=-1)
+		t.push_back({{}, 0,  0}); // root2: even root (len=0)
+		last = 1; s = "";
+	}
+
+	int get_suf(int v, int i) {
+		while (i - t[v].len - 1 < 0 || s[i - t[v].len - 1] != s[i]) v = t[v].suf;
+		return v;
+	}
+
+	void add(char c) {
+		s += c;
+		int i = sz(s) - 1;
+		int cur = get_suf(last, i);
+		if (!t[cur].ch.count(c)) {
+			int now = sz(t);
+			t.push_back({});
+			t[now].len = t[cur].len + 2;
+			int tmp = (t[now].len == 1) ? 1 : t[t[cur].suf].ch[c];
+			t[now].suf = tmp;
+			t[cur].ch[c] = now;
+		}
+		last = t[cur].ch[c];
+		t[last].cnt++;
+	}
+
+	// Propagate counts from longer palindromes to suffix-link ancestors
+	void propagate() {
+		for (int i = sz(t)-1; i >= 2; i--)
+			t[t[i].suf].cnt += t[i].cnt;
+	}
+
+	// Number of distinct non-empty palindromic substrings
+	int distinct_palindromes() { return sz(t) - 2; }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

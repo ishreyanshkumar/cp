@@ -1,0 +1,43 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Two Pointers / Sliding Window</Title>
+		<Author>Tempest</Author>
+		<Description>Template for two-pointer and fixed/variable sliding window problems. O(N). Covers: longest subarray with property, minimum window substring, count of valid subarrays.</Description>
+		<Shortcut>gtwoptr</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example: longest subarray with sum <= K ---
+void solve() {
+	int n; ll K; re(n, K);
+	vi a(n); re(a);
+
+	ll sum = 0, best = 0;
+	for (int l = 0, r = 0; r < n; r++) {
+		sum += a[r];                          // expand right
+		while (sum > K) sum -= a[l++];        // shrink left
+		best = max(best, (ll)(r - l + 1));
+	}
+	pr(best);
+}
+*/
+
+/* // --- Example: count subarrays with exactly K distinct values ---
+// Use f(<=K) - f(<=K-1) trick with the template below.
+ll count_at_most(const vi& a, int K) {
+	int n = sz(a);
+	map<int,int> freq;
+	ll ans = 0;
+	for (int l = 0, r = 0; r < n; r++) {
+		freq[a[r]]++;
+		while (sz(freq) > K) { if (!--freq[a[l]]) freq.erase(a[l]); l++; }
+		ans += r - l + 1; // all subarrays ending at r with <= K distinct
+	}
+	return ans;
+}
+*/
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

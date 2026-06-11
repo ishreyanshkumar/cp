@@ -1,0 +1,56 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Deque / Queue with Minimum (O(1) Query)</Title>
+		<Author>Tempest</Author>
+		<Description>Stack and queue that support O(1) minimum/maximum queries using an auxiliary monotonic deque. Useful for DP optimizations and sliding-window problems where you need the extreme of the current window.</Description>
+		<Shortcut>dsdeqmin</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	MinQueue<ll> mq;
+	int n, k; re(n, k);
+	vi a(n); re(a);
+	// Sliding window minimum of size k
+	F0R(i, n) {
+		mq.push(a[i]);
+		if (i >= k) mq.pop();
+		if (i >= k-1) pr(mq.get_min()); cout << '\n';
+	}
+}
+*/
+
+// Queue with O(1) minimum using two stacks
+template<class T> struct MinQueue {
+	stack<pair<T,T>> in, out; // {value, running_min}
+
+	void push(T x) {
+		T mn = in.empty() ? x : min(x, in.top().second);
+		in.push({x, mn});
+	}
+
+	void pop() {
+		if (out.empty()) {
+			while (!in.empty()) {
+				T x = in.top().first; in.pop();
+				T mn = out.empty() ? x : min(x, out.top().second);
+				out.push({x, mn});
+			}
+		}
+		out.pop();
+	}
+
+	T get_min() {
+		if (in.empty())  return out.top().second;
+		if (out.empty()) return in.top().second;
+		return min(in.top().second, out.top().second);
+	}
+
+	bool empty() { return in.empty() && out.empty(); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

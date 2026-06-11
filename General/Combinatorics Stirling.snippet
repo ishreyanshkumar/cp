@@ -1,0 +1,36 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Stirling Numbers (1st and 2nd Kind)</Title>
+		<Author>Tempest</Author>
+		<Description>Computes Stirling numbers of the first kind S1[n][k] = number of permutations of n with k cycles, and second kind S2[n][k] = number of partitions of n into k non-empty subsets. DP build in O(N^2).</Description>
+		<Shortcut>gstirling</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	auto [s1, s2] = stirling(n);
+	// s1[n][k] mod MOD, s2[n][k] mod MOD
+	pr(s1[n][1]); // (n-1)! : permutations of n with 1 cycle
+	pr(s2[n][1]); // 1      : only one way to put all in 1 subset
+}
+*/
+
+pair<vector<vi>, vector<vi>> stirling(int n) {
+	// S1: unsigned Stirling first kind
+	vector<vi> s1(n+1, vi(n+1, 0)), s2(n+1, vi(n+1, 0));
+	s1[0][0] = s2[0][0] = 1;
+	FOR(i, 1, n+1) {
+		FOR(k, 1, i+1) {
+			s1[i][k] = ((i-1) * s1[i-1][k] % MOD + s1[i-1][k-1]) % MOD;
+			s2[i][k] = (k     * s2[i-1][k] % MOD + s2[i-1][k-1]) % MOD;
+		}
+	}
+	return {s1, s2};
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,32 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Tree Centroid (Single)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: finds the centroid of a tree — the node whose removal minimises the largest remaining component. O(N). Foundation of centroid decomposition; also used standalone for optimal meeting points.</Description>
+		<Shortcut>grcentroid</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vi sub_sz_c;
+
+	void calc_sz_c(int u, int p) {
+		sub_sz_c[u] = 1;
+		EACH(v, adj[u]) if (v != p) { calc_sz_c(v, u); sub_sz_c[u] += sub_sz_c[v]; }
+	}
+
+	// Returns centroid node (0-based). Call after calc_sz_c(root, -1).
+	int find_centroid(int u, int p, int tree_n) {
+		EACH(v, adj[u]) if (v != p && sub_sz_c[v] > tree_n / 2) return find_centroid(v, u, tree_n);
+		return u;
+	}
+
+	int centroid(int root = 0) {
+		sub_sz_c.assign(n, 0);
+		calc_sz_c(root, -1);
+		return find_centroid(root, -1, sub_sz_c[root]);
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

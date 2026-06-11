@@ -1,0 +1,74 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Min-Cost Max Flow (MCMF)</Title>
+		<Author>Graphest</Author>
+		<Description>Successive shortest path algorithm using SPFA (Bellman-Ford queue) for min-cost max-flow. Returns {max_flow, min_cost}. O(V * E * flow). Use for assignment problems, optimal bipartite matching with costs.</Description>
+		<Shortcut>grmcmf</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m, s, t; re(n, m, s, t); s--; t--;
+	MCMF mcmf(n);
+	F0R(i, m) {
+		int u, v; ll cap, cost; re(u, v, cap, cost);
+		mcmf.add_edge(u-1, v-1, cap, cost);
+	}
+	auto [flow, cost] = mcmf.min_cost_flow(s, t);
+	pr(flow, cost);
+}
+*/
+
+struct MCMF {
+	struct Edge { int to, rev; ll cap, cost; };
+	int n;
+	vector<vector<Edge>> adj;
+	vector<ll> dist;
+	vector<bool> in_q;
+	vector<int> prev_v, prev_e;
+
+	MCMF(int _n) : n(_n), adj(n), dist(n), in_q(n), prev_v(n), prev_e(n) {}
+
+	void add_edge(int u, int v, ll cap, ll cost) {
+		adj[u].push_back({v, sz(adj[v]), cap, cost});
+		adj[v].push_back({u, sz(adj[u])-1, 0, -cost});
+	}
+
+	bool spfa(int s, int t) {
+		fill(all(dist), BIG); fill(all(in_q), false);
+		dist[s] = 0;
+		queue<int> q; q.push(s); in_q[s] = true;
+		while (!q.empty()) {
+			int u = q.front(); q.pop(); in_q[u] = false;
+			F0R(i, sz(adj[u])) {
+				auto& e = adj[u][i];
+				if (e.cap > 0 && dist[u] + e.cost < dist[e.to]) {
+					dist[e.to] = dist[u] + e.cost;
+					prev_v[e.to] = u; prev_e[e.to] = i;
+					if (!in_q[e.to]) { q.push(e.to); in_q[e.to] = true; }
+				}
+			}
+		}
+		return dist[t] != BIG;
+	}
+
+	pair<ll,ll> min_cost_flow(int s, int t, ll max_f = BIG) {
+		ll flow = 0, cost = 0;
+		while (flow < max_f && spfa(s, t)) {
+			ll d = max_f - flow;
+			for (int v = t; v != s; v = prev_v[v]) d = min(d, adj[prev_v[v]][prev_e[v]].cap);
+			for (int v = t; v != s; v = prev_v[v]) {
+				adj[prev_v[v]][prev_e[v]].cap -= d;
+				adj[v][adj[prev_v[v]][prev_e[v]].rev].cap += d;
+			}
+			flow += d; cost += d * dist[t];
+		}
+		return {flow, cost};
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

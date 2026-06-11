@@ -1,0 +1,27 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>MST — Kruskal's Algorithm</Title>
+		<Author>Graphest</Author>
+		<Description>WGraph plugin: Minimum Spanning Tree using external DSU. Stores MST weight and edge list. O(E log E).</Description>
+		<Shortcut>grkruskal</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	ll mst_weight = 0;
+	vector<pair<int,int>> mst_edges;
+
+	void kruskal() {
+		vector<tuple<ll,int,int>> edges;
+		F0R(u, n) EACH(e, adj[u])
+			if (u < e.first) edges.emplace_back(e.second, u, e.first);
+		sor(edges);
+		DSU d(n); mst_weight = 0; mst_edges.clear();
+		for (auto [w, u, v] : edges) {
+			if (d.unite(u, v)) { mst_weight += w; mst_edges.push_back({u, v}); }
+		}
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

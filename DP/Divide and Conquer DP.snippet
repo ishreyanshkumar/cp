@@ -1,0 +1,51 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Divide and Conquer DP Optimization</Title>
+		<Author>Tempest</Author>
+		<Description>Reduces O(N^2) DP transitions to O(N log N) when the optimal split point opt(i) is monotone: opt(i) <= opt(i+1). Typical form: dp[i] = min over j of { dp[j] + cost(j+1, i) }.</Description>
+		<Shortcut>dpdnc</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, k; re(n, k); // partition n elements into k groups
+	vi a(n); re(a);
+
+	// cost(l, r) = cost of putting a[l..r] in one group (0-indexed, inclusive)
+	// Precompute prefix sums for fast cost()
+	vi pre(n+1, 0);
+	F0R(i, n) pre[i+1] = pre[i] + a[i];
+	auto cost = [&](int l, int r) -> ll {
+		return pre[r+1] - pre[l]; // example: sum of elements
+	};
+
+	vector<vi> dp(k+1, vi(n, BIG));
+	F0R(i, n) dp[0][i] = cost(0, i);
+
+	FOR(t, 1, k+1) {
+		dc_dp(dp[t], dp[t-1], cost, 0, n-1, 0, n-1);
+	}
+	pr(dp[k-1][n-1]);
+}
+*/
+
+// Requires cost(l, r) callable with the split cost.
+// dp_new[i] = min over j in [jlo, jhi] of { dp_old[j] + cost(j+1, i) }
+template<class Cost>
+void dc_dp(vi& dp_new, const vi& dp_old, Cost cost, int lo, int hi, int jlo, int jhi) {
+	if (lo > hi) return;
+	int mid = (lo + hi) / 2;
+	int opt = jlo;
+	FOR(j, jlo, min(mid, jhi) + 1) {
+		ll val = (dp_old[j] == BIG ? BIG : dp_old[j] + cost(j + 1, mid));
+		if (val < dp_new[mid]) { dp_new[mid] = val; opt = j; }
+	}
+	dc_dp(dp_new, dp_old, cost, lo,   mid-1, jlo,  opt);
+	dc_dp(dp_new, dp_old, cost, mid+1, hi,   opt,  jhi);
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

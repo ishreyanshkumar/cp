@@ -1,0 +1,90 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Suffix Automaton (SAM)</Title>
+		<Author>Tempest</Author>
+		<Description>Builds a suffix automaton in O(N) time and space. Accepts all substrings of s as paths from the initial state. Supports: count of distinct substrings, number of occurrences of each substring, longest common substring of two strings.</Description>
+		<Shortcut>strsam</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	SAM sa(s);
+
+	pr(sa.count_distinct_substrings()); cout << '\n';
+
+	// Count occurrences of pattern p in s:
+	string p; re(p);
+	pr(sa.count_occurrences(p)); cout << '\n';
+}
+*/
+
+struct SAM {
+	struct State {
+		map<char,int> next;
+		int link, len;
+		ll cnt; // number of times this state is an endpoint (occurrences)
+	};
+	vector<State> st;
+	int last;
+
+	SAM() { st.push_back({{}, -1, 0, 0}); last = 0; }
+	SAM(const string& s) : SAM() { EACH(c,s) extend(c); }
+
+	void extend(char c) {
+		int cur = sz(st);
+		st.push_back({{}, -1, st[last].len+1, 1});
+		int p = last;
+		while (p != -1 && !st[p].next.count(c)) {
+			st[p].next[c] = cur; p = st[p].link;
+		}
+		if (p == -1) {
+			st[cur].link = 0;
+		} else {
+			int q = st[p].next[c];
+			if (st[p].len+1 == st[q].len) {
+				st[cur].link = q;
+			} else {
+				int clone = sz(st);
+				st.push_back({st[q].next, st[q].link, st[p].len+1, 0});
+				while (p != -1 && st[p].next.count(c) && st[p].next[c]==q) {
+					st[p].next[c] = clone; p = st[p].link;
+				}
+				st[q].link = st[cur].link = clone;
+			}
+		}
+		last = cur;
+	}
+
+	// Topological sort by len, propagate cnt up suffix links
+	void build_cnt() {
+		int n = sz(st);
+		vi order(n); iota(all(order),0);
+		sort(all(order),[&](int a,int b){return st[a].len>st[b].len;});
+		EACH(v,order) if (st[v].link!=-1) st[st[v].link].cnt += st[v].cnt;
+	}
+
+	// Total distinct substrings = sum of (len - link.len) over all states except root
+	ll count_distinct_substrings() {
+		ll res=0;
+		FOR(i,1,sz(st)) res += st[i].len - st[st[i].link].len;
+		return res;
+	}
+
+	// Occurrences of pattern p in the original string
+	ll count_occurrences(const string& p) {
+		build_cnt();
+		int cur=0;
+		for (char c:p) {
+			if (!st[cur].next.count(c)) return 0;
+			cur = st[cur].next[c];
+		}
+		return st[cur].cnt;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

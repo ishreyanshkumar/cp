@@ -1,0 +1,36 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>SCC — Kosaraju's Algorithm</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: Finds Strongly Connected Components via two-pass DFS. Returns {num_comps, comp_ids[]} where IDs are in topological order (0 = source). O(V+E).</Description>
+		<Shortcut>grscck</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Returns {num_comps, comp_ids[]} in topological order (comp 0 = source SCCs)
+	pair<int, vector<int>> scc() {
+		vector<int> vis(n, 0), order, comp(n, -1);
+		vector<vector<int>> rev(n);
+		F0R(u, n) EACH(v, adj[u]) rev[v].push_back(u);
+
+		function<void(int)> dfs1 = [&](int u) {
+			vis[u] = 1;
+			EACH(v, adj[u]) if (!vis[v]) dfs1(v);
+			order.push_back(u);
+		};
+		function<void(int,int)> dfs2 = [&](int u, int c) {
+			comp[u] = c;
+			EACH(v, rev[u]) if (comp[v] == -1) dfs2(v, c);
+		};
+
+		F0R(i, n) if (!vis[i]) dfs1(i);
+		reverse(all(order));
+		int c = 0;
+		EACH(u, order) if (comp[u] == -1) dfs2(u, c++);
+		return {c, comp};
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

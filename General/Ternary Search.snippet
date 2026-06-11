@@ -1,0 +1,55 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Ternary Search</Title>
+		<Author>Tempest</Author>
+		<Description>Finds the minimum (or maximum) of a strictly unimodal function. Discrete version for integer domains, continuous version for real-valued functions. O(log n) / O(iterations).</Description>
+		<Shortcut>gternary</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	// Discrete: find x in [0, 1e6] that minimises f(x)
+	ll ans_d = ternary_min_discrete(0LL, (ll)1e6, [](ll x) {
+		return x * x - 10 * x + 25; // minimum at x=5
+	});
+	pr(ans_d); cout << '\n';
+
+	// Continuous: find x in [0, 10] that minimises f(x)
+	db ans_c = ternary_min_continuous(0.0, 10.0, [](db x) {
+		return x * x - 10 * x + 25;
+	});
+	pr(ans_c); cout << '\n';
+}
+*/
+
+// Returns x in [L, R] minimising f(x). f must be unimodal (convex).
+// Change f(m1)<f(m2) to > for maximum.
+template<class F>
+ll ternary_min_discrete(ll L, ll R, F f) {
+	while (R - L > 2) {
+		ll m1 = L + (R - L) / 3;
+		ll m2 = R - (R - L) / 3;
+		if (f(m1) < f(m2)) R = m2;
+		else                L = m1;
+	}
+	ll best = L;
+	for (ll x = L + 1; x <= R; x++) if (f(x) < f(best)) best = x;
+	return best;
+}
+
+template<class F>
+db ternary_min_continuous(db L, db R, F f, int iters = 200) {
+	F0R(i, iters) {
+		db m1 = L + (R - L) / 3;
+		db m2 = R - (R - L) / 3;
+		if (f(m1) < f(m2)) R = m2;
+		else                L = m1;
+	}
+	return (L + R) / 2;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

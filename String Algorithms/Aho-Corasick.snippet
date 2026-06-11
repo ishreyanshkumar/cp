@@ -1,0 +1,78 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Aho-Corasick (Multi-Pattern Matching)</Title>
+		<Author>Tempest</Author>
+		<Description>Builds a trie of K patterns then adds BFS failure links for O(|text| + total_matches) multi-pattern search. Also used for DP on strings (number of strings containing/avoiding patterns). O(sum|patterns| + |text|) total.</Description>
+		<Shortcut>straho</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: count occurrences of each pattern in text ---
+void solve() {
+	int k; re(k);
+	AhoCorasick ac;
+	vector<string> pats(k);
+	F0R(i, k) { re(pats[i]); ac.add(pats[i], i); }
+	ac.build();
+
+	string text; re(text);
+	vector<int> cnt(k, 0);
+	ac.search(text, [&](int pat_id) { cnt[pat_id]++; });
+	F0R(i, k) { pr(cnt[i]); cout << '\n'; }
+}
+*/
+
+struct AhoCorasick {
+	struct Node {
+		array<int, 26> ch{}; // children (0 = null)
+		int fail = 0;
+		int pat = -1; // pattern id if this node ends a pattern (-1 otherwise)
+		int dict = 0; // nearest pattern ancestor via suffix links
+	};
+
+	vector<Node> t = {Node{}}; // t[0] = root
+
+	void add(const string& s, int id) {
+		int cur = 0;
+		for (char c : s) {
+			int ch = c - 'a';
+			if (!t[cur].ch[ch]) { t[cur].ch[ch] = sz(t); t.push_back(Node{}); }
+			cur = t[cur].ch[ch];
+		}
+		t[cur].pat = id;
+	}
+
+	void build() {
+		queue<int> q;
+		for (int c : t[0].ch) if (c) q.push(c);
+		while (!q.empty()) {
+			int u = q.front(); q.pop();
+			t[u].dict = (t[t[u].fail].pat != -1) ? t[u].fail : t[t[u].fail].dict;
+			for (int c = 0; c < 26; c++) {
+				int& ch = t[u].ch[c];
+				if (ch) { t[ch].fail = t[t[u].fail].ch[c]; q.push(ch); }
+				else    ch = t[t[u].fail].ch[c];
+			}
+		}
+	}
+
+	// Calls callback(pat_id) for every pattern occurrence in text.
+	template<class F>
+	void search(const string& text, F callback) {
+		int cur = 0;
+		for (char c : text) {
+			cur = t[cur].ch[c - 'a'];
+			for (int v = (t[cur].pat != -1 ? cur : t[cur].dict); v; v = t[v].dict)
+				callback(t[v].pat);
+		}
+	}
+
+	// Current state after reading text prefix — used for DP on automaton.
+	int next_state(int state, char c) { return t[state].ch[c - 'a']; }
+	int size() { return sz(t); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

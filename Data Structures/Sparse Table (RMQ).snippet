@@ -1,0 +1,50 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Sparse Table (Static RMQ)</Title>
+		<Author>Tempest</Author>
+		<Description>O(N log N) build, O(1) idempotent range query (min/max/gcd/bitwise AND|OR). Static array — no updates.</Description>
+		<Shortcut>dsrmq</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vector<int> a(n); re(a);
+	SparseTable<int> st(a); // default: range min
+
+	int q; re(q);
+	while (q--) {
+		int l, r; re(l, r); // 0-based, inclusive
+		pr(st.query(l, r)); cout << '\n';
+	}
+}
+*/
+
+template<class T> struct SparseTable {
+	int n;
+	vector<vector<T>> st;
+	vector<int> lg;
+
+	// Change merge for different operations (must be idempotent)
+	T merge(T a, T b) { return min(a, b); }  // or max, gcd, &, |
+
+	SparseTable(const vector<T>& a) : n(sz(a)), st(1, a), lg(n + 1) {
+		for (int i = 2; i <= n; i++) lg[i] = lg[i / 2] + 1;
+		for (int j = 1; (1 << j) <= n; j++) {
+			st.push_back(vector<T>(n));
+			for (int i = 0; i + (1 << j) <= n; i++)
+				st[j][i] = merge(st[j-1][i], st[j-1][i + (1 << (j-1))]);
+		}
+	}
+
+	T query(int l, int r) {
+		int j = lg[r - l + 1];
+		return merge(st[j][l], st[j][r - (1 << j) + 1]);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

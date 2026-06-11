@@ -1,0 +1,39 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Bitmask DP — Assignment / Permutation</Title>
+		<Author>Tempest</Author>
+		<Description>Minimum-cost assignment of N items to N slots via bitmask DP. dp[mask] = best cost for the subset 'mask'. The i-th bit indicates item i is assigned. Time: O(N * 2^N).</Description>
+		<Shortcut>dpbitmask</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vector<vi> cost(n, vi(n)); re(cost); // cost[step][item]
+	pr(solve_dp(n, cost));
+}
+*/
+
+ll solve_dp(int n, const vector<vi>& cost) {
+	vector<ll> dp(1 << n, BIG);
+	dp[0] = 0;
+
+	F0R(mask, 1 << n) {
+		if (dp[mask] == BIG) continue;
+		int step = __builtin_popcount(mask); // next slot to fill
+		if (step == n) continue;
+		F0R(item, n) {
+			if (!(mask & (1 << item))) {
+				int nxt = mask | (1 << item);
+				dp[nxt] = min(dp[nxt], dp[mask] + cost[step][item]);
+			}
+		}
+	}
+	return dp[(1 << n) - 1];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,27 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Topological Sort (Kahn's BFS)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: BFS-based topological ordering (Kahn's algorithm). Returns empty vector if graph has a cycle. O(V+E).</Description>
+		<Shortcut>grtopo</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Returns topological order, or {} if a cycle exists
+	vector<int> toposort() {
+		vector<int> in(n, 0), res;
+		F0R(u, n) EACH(v, adj[u]) in[v]++;
+		queue<int> q;
+		F0R(i, n) if (!in[i]) q.push(i);
+		while (!q.empty()) {
+			int u = q.front(); q.pop();
+			res.push_back(u);
+			EACH(v, adj[u]) if (!--in[v]) q.push(v);
+		}
+		return sz(res) == n ? res : vector<int>{};
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

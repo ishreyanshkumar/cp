@@ -1,0 +1,35 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>3D Geometry (Point / Vector)</Title>
+		<Author>Tempest</Author>
+		<Description>3D integer point with dot product, cross product, squared norm, and triple product. Forms the base for 3D computational geometry (planes, volume of tetrahedra, etc.).</Description>
+		<Shortcut>ggeo3d</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	P3 a{1,0,0}, b{0,1,0}, c{0,0,1};
+	auto n = a.cross(b);         // normal vector
+	pr(n.x, n.y, n.z);           // 0 0 1
+	pr(a.dot(b));                 // 0 (perpendicular)
+	pr(a.triple(b, c));          // 1 (volume of parallelepiped * 6)
+}
+*/
+
+struct P3 {
+	ll x, y, z;
+	P3 operator+(const P3& o) const { return {x+o.x, y+o.y, z+o.z}; }
+	P3 operator-(const P3& o) const { return {x-o.x, y-o.y, z-o.z}; }
+	P3 operator*(ll k)        const { return {x*k, y*k, z*k}; }
+	ll  dot  (const P3& o)   const { return x*o.x + y*o.y + z*o.z; }
+	P3  cross(const P3& o)   const { return {y*o.z-z*o.y, z*o.x-x*o.z, x*o.y-y*o.x}; }
+	ll  sq   ()              const { return dot(*this); }
+	ll  triple(const P3& b, const P3& c) const { return dot(b.cross(c)); }
+	bool operator==(const P3& o) const { return tie(x,y,z)==tie(o.x,o.y,o.z); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

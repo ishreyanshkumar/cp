@@ -1,0 +1,95 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Heavy-Light Decomposition (HLD)</Title>
+		<Author>Graphest</Author>
+		<Description>Decomposes tree into heavy chains for O(log^2 N) path and O(log N) subtree queries using an internal Segment Tree. Adapt T, ID, and comb for different monoids.</Description>
+		<Shortcut>trhld</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	HLD hld(n);
+	F0R(i, n-1) { int u, v; re(u, v); hld.add(u-1, v-1); }
+	vi vals(n); re(vals);
+	hld.build();
+	hld.build_vals(vals);
+
+	int u, v; re(u, v); u--; v--;
+	pr(hld.path(u, v));    // aggregate on path u-v
+	pr(hld.subtree(u));    // aggregate on subtree of u
+	hld.update(u, 10);     // point update
+}
+*/
+
+struct HLD {
+	using T = ll;
+	const T ID = 0;                        // 0 for sum | BIG for min | -BIG for max
+	T comb(T a, T b) { return a + b; }    // change: min, max, gcd, xor, ...
+
+	int n;
+	vector<vi> adj;
+	vi par, depth, head, pos, sz;
+	vector<T> tree; // iterative seg tree size 2*n
+
+	HLD(int _n) : n(_n), adj(n), par(n,-1), depth(n,0), head(n), pos(n), sz(n,1), tree(2*n, ID) {}
+
+	void add(int u, int v) { adj[u].push_back(v); adj[v].push_back(u); }
+
+	void dfs_sz(int u, int p) {
+		par[u] = p;
+		EACH(v, adj[u]) if (v != p) {
+			depth[v] = depth[u] + 1; dfs_sz(v, u); sz[u] += sz[v];
+			if (sz[v] > sz[adj[u][0]] || adj[u][0] == p) swap(v, adj[u][0]);
+		}
+	}
+
+	void dfs_hld(int u, int p, int& t) {
+		pos[u] = t++;
+		EACH(v, adj[u]) if (v != p) {
+			head[v] = (v == adj[u][0] ? head[u] : v);
+			dfs_hld(v, u, t);
+		}
+	}
+
+	void build(int root = 0) {
+		head[root] = root; dfs_sz(root, -1);
+		int t = 0; dfs_hld(root, -1, t);
+	}
+
+	void build_vals(const vector<T>& vals) {
+		F0R(i, n) tree[n + pos[i]] = vals[i];
+		for (int i = n-1; i > 0; i--) tree[i] = comb(tree[i<<1], tree[i<<1|1]);
+	}
+
+	void update(int u, T val) {
+		for (tree[u = pos[u]+n] = val; u > 1; u >>= 1) tree[u>>1] = comb(tree[u], tree[u^1]);
+	}
+
+	T seg_query(int l, int r) { // [l, r)
+		T res = ID;
+		for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+			if (l & 1) res = comb(res, tree[l++]);
+			if (r & 1) res = comb(res, tree[--r]);
+		}
+		return res;
+	}
+
+	T path(int u, int v) {
+		T res = ID;
+		for (; head[u] != head[v]; u = par[head[u]]) {
+			if (depth[head[u]] < depth[head[v]]) swap(u, v);
+			res = comb(res, seg_query(pos[head[u]], pos[u]+1));
+		}
+		if (depth[u] > depth[v]) swap(u, v);
+		return comb(res, seg_query(pos[u], pos[v]+1));
+	}
+
+	T subtree(int u) { return seg_query(pos[u], pos[u]+sz[u]); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

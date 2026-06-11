@@ -1,0 +1,53 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Modular Combinatorics (nCr / nPr)</Title>
+		<Author>Tempest</Author>
+		<Description>O(N) precomputation of factorials and inverse-factorials for O(1) nCr / nPr queries mod a prime. Default mod = 1e9+7.</Description>
+		<Shortcut>gmodcomb</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ModComb mc(200000); // precompute up to 2e5
+	int n, r; re(n, r);
+	pr(mc.nCr(n, r)); cout << '\n';
+	pr(mc.nPr(n, r)); cout << '\n';
+}
+*/
+
+struct ModComb {
+	int n; ll mod;
+	vector<ll> fact, inv;
+
+	ModComb(int _n, ll _mod = 1e9 + 7) : n(_n), mod(_mod), fact(n + 1), inv(n + 1) {
+		fact[0] = 1;
+		FOR(i, 1, n + 1) fact[i] = fact[i - 1] * i % mod;
+		inv[n] = power(fact[n], mod - 2);
+		R0F(i, n) inv[i] = inv[i + 1] * (i + 1) % mod;
+	}
+
+	ll power(ll base, ll exp) {
+		ll res = 1; base %= mod;
+		for (; exp > 0; exp >>= 1) {
+			if (exp & 1) res = res * base % mod;
+			base = base * base % mod;
+		}
+		return res;
+	}
+
+	ll nCr(int n, int r) {
+		if (r < 0 || r > n) return 0;
+		return fact[n] * inv[r] % mod * inv[n - r] % mod;
+	}
+
+	ll nPr(int n, int r) {
+		if (r < 0 || r > n) return 0;
+		return fact[n] * inv[n - r] % mod;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

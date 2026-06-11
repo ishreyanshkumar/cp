@@ -1,0 +1,58 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Digit DP Skeleton</Title>
+		<Author>Tempest</Author>
+		<Description>Count integers in [0, N] satisfying a digit-based property. State: (position, tight, started, custom_state). Memoised with map or array. Adapt the transition and base case for your problem.</Description>
+		<Shortcut>dpdigit</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: count numbers in [L, R] with digit sum == S ---
+void solve() {
+	ll L, R; int S; re(L, R, S);
+	pr(count(R, S) - count(L - 1, S));
+}
+
+ll count(ll n, int target) {
+	if (n < 0) return 0;
+	string digits = to_string(n);
+	int m = sz(digits);
+	// dp[pos][tight][started][digit_sum]
+	map<tuple<int,bool,bool,int>, ll> memo;
+
+	function<ll(int, bool, bool, int)> dp = [&](int pos, bool tight, bool started, int sum) -> ll {
+		if (sum > target) return 0;
+		if (pos == m) return started && sum == target ? 1 : 0;
+		auto key = make_tuple(pos, tight, started, sum);
+		if (memo.count(key)) return memo[key];
+		int lim = tight ? (digits[pos] - '0') : 9;
+		ll res = 0;
+		F0R(d, lim + 1) {
+			bool new_tight   = tight && (d == lim);
+			bool new_started = started || (d > 0);
+			int  new_sum     = new_started ? sum + d : 0;
+			res += dp(pos + 1, new_tight, new_started, new_sum);
+		}
+		return memo[key] = res;
+	};
+	return dp(0, true, false, 0);
+}
+*/
+
+// --- Digit DP template (adapt for your problem) ---
+// count(N) = number of integers in [0, N] satisfying your property.
+// Answer for [L, R] = count(R) - count(L-1).
+//
+// State variables to customise:
+//   pos     : current digit position (0-indexed from MSB)
+//   tight   : true if current prefix == prefix of N
+//   started : true if a non-zero digit has been placed
+//   state   : your problem-specific state (digit sum, remainder, etc.)
+//
+// Base case (pos == len): return 1 if the number satisfies your property.
+// Transition: iterate d from 0 to limit, recurse with updated state.
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

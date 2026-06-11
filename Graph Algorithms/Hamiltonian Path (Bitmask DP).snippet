@@ -1,0 +1,32 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Hamiltonian Path Counter (Bitmask DP)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: counts simple paths from src to sink visiting all N nodes exactly once via bitmask DP. O(N^2 * 2^N). Requires n <= 20.</Description>
+		<Shortcut>grhamilton</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// dp[mask][u] = # paths covering nodes in 'mask', ending at u.
+	ll count_hamiltonian(int src, int sink) {
+		const int FULL = 1 << n;
+		vector<vector<ll>> dp(FULL, vector<ll>(n, 0));
+		dp[1 << src][src] = 1;
+
+		FOR(mask, 1, FULL) {
+			if (!(mask & (1 << src))) continue;
+			if ((mask & (1 << sink)) && mask != FULL - 1) continue;
+			F0R(u, n) {
+				if (!(mask & (1 << u)) || !dp[mask][u]) continue;
+				EACH(v, adj[u]) if (!(mask & (1 << v))) {
+					dp[mask | (1 << v)][v] = (dp[mask | (1 << v)][v] + dp[mask][u]) % MOD;
+				}
+			}
+		}
+		return dp[FULL - 1][sink];
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

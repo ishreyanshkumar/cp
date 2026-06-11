@@ -1,0 +1,52 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Prefix / Suffix Sum and Product</Title>
+		<Author>Tempest</Author>
+		<Description>O(N) prefix sum, suffix sum, prefix product, and 2D prefix sum helpers. Building blocks used in nearly every array/grid problem.</Description>
+		<Shortcut>gprefix</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	auto pre = prefix_sum(a);   // pre[i] = a[0]+...+a[i-1], pre[0]=0, size n+1
+	// range sum [l, r] (0-based inclusive):
+	ll range = pre[r+1] - pre[l];
+
+	// 2D prefix sum
+	int R, C; re(R, C);
+	vector<vi> g(R, vi(C)); re(g);
+	auto p2 = prefix2d(g);
+	// rectangle sum rows [r1,r2], cols [c1,c2] (0-based inclusive):
+	ll rect = p2[r2+1][c2+1] - p2[r1][c2+1] - p2[r2+1][c1] + p2[r1][c1];
+}
+*/
+
+vi prefix_sum(const vi& a) {
+	vi pre(sz(a) + 1, 0);
+	F0R(i, sz(a)) pre[i+1] = pre[i] + a[i];
+	return pre;
+}
+
+vi suffix_sum(const vi& a) {
+	int n = sz(a);
+	vi suf(n + 1, 0);
+	R0F(i, n) suf[i] = suf[i+1] + a[i];
+	return suf;
+}
+
+vector<vi> prefix2d(const vector<vi>& g) {
+	int R = sz(g), C = sz(g[0]);
+	vector<vi> p(R+1, vi(C+1, 0));
+	FOR(r, 1, R+1) FOR(c, 1, C+1)
+		p[r][c] = g[r-1][c-1] + p[r-1][c] + p[r][c-1] - p[r-1][c-1];
+	return p;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

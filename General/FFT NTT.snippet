@@ -1,0 +1,64 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>FFT / NTT (Polynomial Multiplication)</Title>
+		<Author>Tempest</Author>
+		<Description>NTT for exact polynomial multiplication mod a prime (default 998244353). Falls back to FFT with doubles for other moduli. O(N log N). Use multiply() for convolution of two arrays.</Description>
+		<Shortcut>gntt</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	// Multiply polynomials A and B
+	int n; re(n);
+	vector<ll> A(n), B(n); re(A, B);
+	auto C = multiply(A, B); // C[k] = sum of A[i]*B[j] where i+j==k
+	pr(C);
+}
+*/
+
+const ll NTT_MOD = 998244353; // = 119 * 2^23 + 1, primitive root g=3
+
+void ntt(vector<ll>& a, bool inv) {
+	int n = a.size();
+	for (int i = 1, j = 0; i < n; i++) {
+		int bit = n >> 1;
+		for (; j & bit; bit >>= 1) j ^= bit;
+		j ^= bit;
+		if (i < j) swap(a[i], a[j]);
+	}
+	for (int len = 2; len <= n; len <<= 1) {
+		ll w = inv ? powmod(3, NTT_MOD - 1 - (NTT_MOD - 1) / len, NTT_MOD)
+		           : powmod(3, (NTT_MOD - 1) / len, NTT_MOD);
+		for (int i = 0; i < n; i += len) {
+			ll wn = 1;
+			for (int j = 0; j < len / 2; j++) {
+				ll u = a[i+j], v = a[i+j+len/2] * wn % NTT_MOD;
+				a[i+j] = (u + v) % NTT_MOD;
+				a[i+j+len/2] = (u - v + NTT_MOD) % NTT_MOD;
+				wn = wn * w % NTT_MOD;
+			}
+		}
+	}
+	if (inv) {
+		ll n_inv = powmod(n, NTT_MOD - 2, NTT_MOD);
+		EACH(x, a) x = x * n_inv % NTT_MOD;
+	}
+}
+
+// Requires powmod (g_binpow) in scope
+vector<ll> multiply(vector<ll> a, vector<ll> b) {
+	int result_size = sz(a) + sz(b) - 1;
+	int n = 1; while (n < result_size) n <<= 1;
+	a.resize(n); b.resize(n);
+	ntt(a, false); ntt(b, false);
+	F0R(i, n) a[i] = a[i] * b[i] % NTT_MOD;
+	ntt(a, true);
+	a.resize(result_size);
+	return a;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,47 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Arbitrary Base Conversion</Title>
+		<Author>Tempest</Author>
+		<Description>Converts a number string from base B1 to base B2 using big-integer arithmetic. Handles numbers beyond long long. Supports bases 2-36 using 0-9 and A-Z digits. Time: O(N^2).</Description>
+		<Shortcut>gbase</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; int b1, b2;
+	re(s, b1, b2); // e.g. "1A" 16 10  =>  "26"
+	pr(BaseConv::run(s, b1, b2));
+}
+*/
+
+struct BaseConv {
+	static int val(char c) {
+		if (c >= '0' && c <= '9') return c - '0';
+		return (c >= 'A' && c <= 'Z' ? c - 'A' : c - 'a') + 10;
+	}
+	static char digit(int v) { return v < 10 ? '0' + v : 'A' + v - 10; }
+
+	static string run(const string& s, int b1, int b2) {
+		if (s == "0") return "0";
+		vector<int> v;
+		EACH(c, s) v.push_back(val(c));
+
+		string res;
+		while (!v.empty()) {
+			ll rem = 0;
+			EACH(d, v) { rem = rem * b1 + d; d = (int)(rem / b2); rem %= b2; }
+			res += digit((int)rem);
+			// strip leading zeros
+			int i = 0; while (i < sz(v) && v[i] == 0) i++;
+			v.erase(v.begin(), v.begin() + i);
+		}
+		reverse(all(res));
+		return res;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

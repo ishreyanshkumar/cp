@@ -1,0 +1,34 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Bellman-Ford (Negative Weights)</Title>
+		<Author>Graphest</Author>
+		<Description>WGraph plugin: SSSP with negative weights. Returns true if a negative cycle is reachable from s. O(VE).</Description>
+		<Shortcut>grbellman</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<ll> dist;
+
+	// Returns true if a negative cycle is reachable from s
+	bool bellman(int s) {
+		dist.assign(n, BIG); dist[s] = 0;
+		int last = -1;
+		F0R(iter, n) {
+			last = -1;
+			F0R(u, n) if (dist[u] != BIG) {
+				EACH(e, adj[u]) {
+					auto [v, w] = e;
+					if (dist[u] + w < dist[v]) {
+						dist[v] = dist[u] + w;
+						last = v;
+					}
+				}
+			}
+		}
+		return last != -1; // true => negative cycle
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

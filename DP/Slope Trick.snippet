@@ -1,0 +1,63 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Slope Trick</Title>
+		<Author>Tempest</Author>
+		<Description>Maintains the piecewise-linear convex function f(x) implicitly by storing its slope breakpoints in two heaps. Supports O(log N) push_left/push_right (extend domain), shift (translate), and query_min. Used for isotonic regression, "make array non-decreasing" style problems.</Description>
+		<Shortcut>dpslope</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: minimum cost to make array non-decreasing ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	SlopeTrick st;
+	EACH(x, a) {
+		st.push_right(x);       // add |f - x| to cost
+		if (st.max_left() > st.min_right()) {
+			ll bad = st.max_left();
+			st.min_cost += bad - st.min_right();
+			st.pop_left(); st.push_left(st.min_right());
+			st.pop_right(); st.push_right(bad); // re-balance
+		}
+	}
+	pr(st.min_cost);
+}
+*/
+
+struct SlopeTrick {
+	ll min_cost = 0;
+	// L = max-heap of left breakpoints, R = min-heap of right breakpoints
+	priority_queue<ll> L;
+	priority_queue<ll, vector<ll>, greater<ll>> R;
+	ll loff = 0, roff = 0; // lazy offsets for bulk shift
+
+	ll max_left()  { return L.empty() ? -BIG : L.top() + loff; }
+	ll min_right() { return R.empty() ?  BIG : R.top() + roff; }
+
+	void push_left(ll x)  { L.push(x - loff); }
+	void push_right(ll x) { R.push(x - roff); }
+	void pop_left()  { L.pop(); }
+	void pop_right() { R.pop(); }
+
+	// Add |f - a| to the function: insert a into both sides, fix if crossed
+	void add_abs(ll a) {
+		push_left(a); push_right(a);
+		if (max_left() > min_right()) {
+			ll l = max_left(), r = min_right();
+			min_cost += l - r;
+			pop_left(); push_left(r);
+			pop_right(); push_right(l);
+		}
+	}
+
+	// Shift left part: all L breakpoints -= v (make array non-decreasing: shift right by last element)
+	void shift_L(ll v) { loff += v; }
+	void shift_R(ll v) { roff += v; }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

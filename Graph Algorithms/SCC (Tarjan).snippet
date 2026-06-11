@@ -1,0 +1,39 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>SCC — Tarjan's Algorithm</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: SCCs via single DFS (Tarjan). IDs are in reverse topological order (0 = sink). Flip to get source-first. O(V+E).</Description>
+		<Shortcut>grscct</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Returns {num_comps, comp_ids[]}
+	// comp IDs are in REVERSE topological order (0 = sink).
+	// For topological order: F0R(i,n) comp[i] = C - 1 - comp[i];
+	pair<int, vector<int>> tarjan() {
+		vector<int> dfn(n, 0), low(n), comp(n, -1), st;
+		vector<bool> on_st(n, false);
+		int timer = 0, C = 0;
+
+		function<void(int)> dfs = [&](int u) {
+			dfn[u] = low[u] = ++timer;
+			st.push_back(u); on_st[u] = true;
+			EACH(v, adj[u]) {
+				if (!dfn[v]) { dfs(v); low[u] = min(low[u], low[v]); }
+				else if (on_st[v]) low[u] = min(low[u], dfn[v]);
+			}
+			if (low[u] == dfn[u]) {
+				int v;
+				do { v = st.back(); st.pop_back(); on_st[v] = false; comp[v] = C; } while (v != u);
+				C++;
+			}
+		};
+
+		F0R(i, n) if (!dfn[i]) dfs(i);
+		return {C, comp};
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

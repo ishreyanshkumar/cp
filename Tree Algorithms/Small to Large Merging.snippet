@@ -1,0 +1,53 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Small-to-Large Merging (DSU on Tree)</Title>
+		<Author>Graphest</Author>
+		<Description>Merges child sets into parent by always merging smaller into larger. O(N log N) total. Solves "distinct values / count of X in every subtree" class of problems. Graph plugin.</Description>
+		<Shortcut>trs2l</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: count distinct values in each subtree ---
+void solve() {
+	int n; re(n);
+	vi val(n); re(val);
+	Graph G(n); G.read(n-1, false);
+
+	vi ans(n);
+	// Each node owns a set of values in its subtree
+	vector<set<ll>> sets(n);
+
+	s2l_merge(G, val, [&](int u, set<ll>& s) {
+		ans[u] = sz(s);
+	});
+	pr(ans);
+}
+*/
+
+// F(u, set) called for each node u after its subtree set is complete.
+// val[u] = the value at node u.
+template<class F>
+void s2l_merge(const Graph& G, const vi& val, F callback, int root = 0) {
+	vector<set<ll>*> sets(G.n, nullptr);
+	F0R(i, G.n) sets[i] = new set<ll>();
+
+	function<void(int, int)> dfs = [&](int u, int p) {
+		sets[u]->insert(val[u]);
+		EACH(v, G.adj[u]) {
+			if (v == p) continue;
+			dfs(v, u);
+			// Merge smaller into larger
+			if (sets[u]->size() < sets[v]->size()) swap(sets[u], sets[v]);
+			EACH(x, *sets[v]) sets[u]->insert(x);
+			delete sets[v]; sets[v] = nullptr;
+		}
+		callback(u, *sets[u]);
+	};
+	dfs(root, -1);
+	delete sets[root];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

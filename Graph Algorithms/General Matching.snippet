@@ -1,0 +1,94 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>General Maximum Matching (Blossom / Edmond's)</Title>
+		<Author>Graphest</Author>
+		<Description>Maximum matching on general (non-bipartite) graphs via Edmond's Blossom algorithm. O(V^3). Returns match[] where match[u]=v means u is matched to v (-1 if unmatched).</Description>
+		<Shortcut>grgenmatch</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m; re(n, m);
+	Blossom bl(n);
+	F0R(i, m) { int u, v; re(u, v); bl.add_edge(u-1, v-1); }
+	auto [cnt, match] = bl.max_matching();
+	pr(cnt); // size of matching
+}
+*/
+
+struct Blossom {
+	int n;
+	vector<vector<int>> adj;
+	vi match, p, base;
+	vector<bool> blossom, vis;
+
+	Blossom(int _n) : n(_n), adj(n) {}
+	void add_edge(int u, int v) { adj[u].push_back(v); adj[v].push_back(u); }
+
+	int lca(int a, int b) {
+		vector<bool> used(n, false);
+		while (true) {
+			a = base[a]; used[a] = true;
+			if (match[a] == -1) break;
+			a = p[match[a]];
+		}
+		while (true) {
+			b = base[b];
+			if (used[b]) return b;
+			b = p[match[b]];
+		}
+	}
+
+	void markPath(int v, int b, int child, queue<int>& q) {
+		for (; base[v] != b; v = p[match[v]]) {
+			blossom[base[v]] = blossom[base[match[v]]] = true;
+			p[v] = child; child = match[v];
+			if (!vis[match[v]]) { vis[match[v]] = true; q.push(match[v]); }
+		}
+	}
+
+	int tryKuhn(int root) {
+		fill(all(vis), false); fill(all(p), -1);
+		iota(all(base), 0);
+		vis[root] = true;
+		queue<int> q; q.push(root);
+		while (!q.empty()) {
+			int v = q.front(); q.pop();
+			EACH(to, adj[v]) {
+				if (base[v] == base[to] || match[v] == to) continue;
+				if (to == root || (match[to] != -1 && p[match[to]] != -1)) {
+					int curbase = lca(v, to);
+					fill(all(blossom), false);
+					markPath(v, curbase, to, q);
+					markPath(to, curbase, v, q);
+					F0R(i, n) if (blossom[base[i]]) { base[i] = curbase; if (!vis[i]) { vis[i]=true; q.push(i); } }
+				} else if (p[to] == -1) {
+					p[to] = v;
+					if (match[to] == -1) return to;
+					to = match[to]; vis[to] = true; q.push(to);
+				}
+			}
+		}
+		return -1;
+	}
+
+	pair<int, vi> max_matching() {
+		match.assign(n, -1); int res = 0;
+		F0R(v, n) {
+			if (match[v] != -1) continue;
+			p.assign(n,-1); base.resize(n); blossom.assign(n,false); vis.assign(n,false);
+			int u = tryKuhn(v);
+			if (u != -1) {
+				res++;
+				while (u != -1) { int pv=p[u], ppv=match[pv]; match[u]=pv; match[pv]=u; u=ppv; }
+			}
+		}
+		return {res, match};
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,73 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Mo's Algorithm (Offline Range Queries)</Title>
+		<Author>Tempest</Author>
+		<Description>Answers arbitrary offline range queries in O((N+Q)*sqrt(N)) by sorting queries to minimise total add/remove operations. Implement add(), remove(), and get_answer().</Description>
+		<Shortcut>gmo</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: count distinct values in [l, r] ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+
+	// --- Mo state ---
+	vector<int> freq(200001, 0);
+	int distinct = 0;
+
+	auto add = [&](int pos) {
+		if (++freq[a[pos]] == 1) distinct++;
+	};
+	auto rem = [&](int pos) {
+		if (--freq[a[pos]] == 0) distinct--;
+	};
+	auto get = [&]() { return distinct; };
+
+	Mo mo(n, q);
+	vector<ll> ans(q);
+	mo.run(q, add, rem, [&](int qi) { ans[qi] = get(); });
+	F0R(i, q) { pr(ans[i]); cout << '\n'; }
+}
+*/
+
+struct Mo {
+	int n, block;
+	vector<pair<int,int>> queries; // {l, r}
+
+	Mo(int _n, int _q) : n(_n), block(max(1, (int)sqrt(_n))) {
+		queries.reserve(_q);
+	}
+
+	void add_query(int l, int r) { queries.push_back({l, r}); }
+
+	// F_add(pos), F_rem(pos), F_ans(query_idx)
+	template<class Add, class Rem, class Ans>
+	void run(int q, Add f_add, Rem f_rem, Ans f_ans) {
+		if (sz(queries) != q) { // auto-read if not pre-added
+			queries.resize(q);
+			F0R(i, q) { int l, r; re(l, r); queries[i] = {l - 1, r - 1}; }
+		}
+		vector<int> ord(q); iota(all(ord), 0);
+		sort(all(ord), [&](int a, int b) {
+			int ba = queries[a].first / block, bb = queries[b].first / block;
+			if (ba != bb) return ba < bb;
+			return (ba & 1) ? queries[a].second > queries[b].second
+			               : queries[a].second < queries[b].second;
+		});
+		int curl = 0, curr = -1;
+		for (int qi : ord) {
+			auto [l, r] = queries[qi];
+			while (curr < r) f_add(++curr);
+			while (curl > l) f_add(--curl);
+			while (curr > r) f_rem(curr--);
+			while (curl < l) f_rem(curl++);
+			f_ans(qi);
+		}
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

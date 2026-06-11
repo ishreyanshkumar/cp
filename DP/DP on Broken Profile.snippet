@@ -1,0 +1,56 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Broken Profile DP (Grid Tiling)</Title>
+		<Author>Tempest</Author>
+		<Description>Counts the number of ways to tile an N×M grid with 1×2 dominoes using broken-profile DP (profile = bitmask of current column boundary). O(N * M * 2^N). Works for small N (≤20). Classic problem: domino tilings, plug DP.</Description>
+		<Shortcut>dpprofile</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m; re(n, m);
+	// Count domino tilings of n x m grid
+	// Swap so n <= m for efficiency
+	if (n > m) swap(n, m);
+	pr(domino_count(n, m));
+}
+*/
+
+// Count 1x2 domino tilings of an n x m grid. n should be the smaller dimension.
+ll domino_count(int n, int m) {
+	if ((ll)n * m % 2 == 1) return 0;
+	int states = 1 << n;
+	vector<ll> dp(states, 0);
+	dp[0] = 1;
+
+	// Process cell by cell, left to right, top to bottom
+	F0R(col, m) {
+		F0R(row, n) {
+			vector<ll> ndp(states, 0);
+			F0R(mask, states) {
+				if (!dp[mask]) continue;
+				bool cur_filled = (mask >> row) & 1;
+				if (cur_filled) {
+					// Already filled by a horizontal domino from left or vertical from above
+					ndp[mask ^ (1 << row)] += dp[mask];
+				} else {
+					// Place vertical domino (fills row and row+1 in same column)
+					if (row + 1 < n && !((mask >> (row+1)) & 1)) {
+						ndp[mask | (1 << row) | (1 << (row+1))] += dp[mask];
+					}
+					// Place horizontal domino (extends into next column — mark bit)
+					ndp[mask | (1 << row)] += dp[mask];
+				}
+				ndp[mask] %= MOD;
+			}
+			dp = ndp;
+		}
+	}
+	return dp[0];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

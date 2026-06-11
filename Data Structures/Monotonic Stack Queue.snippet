@@ -1,0 +1,69 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Monotonic Stack and Queue</Title>
+		<Author>Tempest</Author>
+		<Description>Monotonic stack for next/previous greater/smaller element in O(N). Sliding window minimum/maximum via monotonic deque in O(N). Both are building blocks for many DP optimizations.</Description>
+		<Shortcut>dsmono</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	// Next greater element
+	auto nge = next_greater(a); // nge[i] = index of next element > a[i], or n if none
+
+	// Sliding window min of size k
+	int k; re(k);
+	auto win = sliding_min(a, k); // win[i] = min of a[i..i+k-1]
+}
+*/
+
+// Next greater element to the right. Returns n if none.
+// Change > to >= for next greater-or-equal; < for next smaller.
+vi next_greater(const vi& a) {
+	int n = sz(a);
+	vi res(n, n);
+	stack<int> st;
+	F0R(i, n) {
+		while (!st.empty() && a[st.top()] < a[i]) {
+			res[st.top()] = i; st.pop();
+		}
+		st.push(i);
+	}
+	return res;
+}
+
+// Previous smaller element to the left. Returns -1 if none.
+vi prev_smaller(const vi& a) {
+	int n = sz(a);
+	vi res(n, -1);
+	stack<int> st;
+	F0R(i, n) {
+		while (!st.empty() && a[st.top()] >= a[i]) st.pop();
+		if (!st.empty()) res[i] = st.top();
+		st.push(i);
+	}
+	return res;
+}
+
+// Sliding window minimum for window size k. Returns vector of size n-k+1.
+vi sliding_min(const vi& a, int k) {
+	int n = sz(a);
+	vi res;
+	deque<int> dq;
+	F0R(i, n) {
+		while (!dq.empty() && a[dq.back()] >= a[i]) dq.pop_back();
+		dq.push_back(i);
+		if (dq.front() == i - k) dq.pop_front();
+		if (i >= k - 1) res.push_back(a[dq.front()]);
+	}
+	return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

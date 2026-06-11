@@ -1,0 +1,62 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Pollard's Rho Factorization</Title>
+		<Author>Tempest</Author>
+		<Description>O(n^(1/4)) probabilistic factorization using Brent's improvement. Returns all prime factors of n in sorted order. Uses Miller-Rabin for primality. Handles n up to ~10^18.</Description>
+		<Shortcut>gpollard</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll n; re(n);
+	// 60 -> {2, 2, 3, 5}
+	auto factors = factorize(n);
+	pr(factors);
+}
+*/
+
+// Requires miller_rabin (g_miller) in scope
+using ull = unsigned long long;
+using u128 = __uint128_t;
+
+ull mulmod(ull a, ull b, ull m) { return (u128)a * b % m; }
+ull powmod(ull a, ull b, ull m) {
+	ull res = 1; a %= m;
+	for (; b; b >>= 1) { if (b & 1) res = mulmod(res, a, m); a = mulmod(a, a, m); }
+	return res;
+}
+
+ull pollard_rho(ull n) {
+	if (n % 2 == 0) return 2;
+	ull x = rand() % (n - 2) + 2, y = x;
+	ull c = rand() % (n - 1) + 1, d = 1;
+	while (d == 1) {
+		x = (mulmod(x, x, n) + c) % n;
+		y = (mulmod(y, y, n) + c) % n;
+		y = (mulmod(y, y, n) + c) % n;
+		d = __gcd(x > y ? x - y : y - x, n);
+	}
+	return d;
+}
+
+void _factorize(ull n, vector<ull>& res) {
+	if (n == 1) return;
+	if (miller_rabin(n)) { res.push_back(n); return; }
+	ull d = n;
+	while (d == n) d = pollard_rho(n);
+	_factorize(d, res);
+	_factorize(n / d, res);
+}
+
+vector<ull> factorize(ull n) {
+	vector<ull> res;
+	_factorize(n, res);
+	sort(res.begin(), res.end());
+	return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,32 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Disjoint Set Union (DSU)</Title>
+		<Author>Graphest</Author>
+		<Description>DSU with path compression and union-by-size. O(alpha(N)) per operation. Tracks component count and component sizes.</Description>
+		<Shortcut>grdsu</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+struct DSU {
+	vector<int> p, sz;
+	int comps;
+
+	DSU(int n) : p(n), sz(n, 1), comps(n) { iota(all(p), 0); }
+
+	int  find(int x)         { return p[x] == x ? x : p[x] = find(p[x]); }
+	bool same(int x, int y)  { return find(x) == find(y); }
+	int  size(int x)         { return sz[find(x)]; }
+
+	bool unite(int x, int y) {
+		x = find(x); y = find(y);
+		if (x == y) return false;
+		if (sz[x] < sz[y]) swap(x, y);
+		p[y] = x; sz[x] += sz[y]; comps--;
+		return true;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

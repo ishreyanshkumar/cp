@@ -1,0 +1,37 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>BFS (Unweighted SSSP + Path)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: SSSP on unweighted graphs with path reconstruction. dist[v] == -1 means unreachable. O(V+E).</Description>
+		<Shortcut>grbfs</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<int> dist, par;
+
+	void bfs(int s) {
+		dist.assign(n, -1); par.assign(n, -1);
+		queue<int> q;
+		dist[s] = 0; q.push(s);
+		while (!q.empty()) {
+			int u = q.front(); q.pop();
+			EACH(v, adj[u]) if (dist[v] == -1) {
+				dist[v] = dist[u] + 1;
+				par[v] = u;
+				q.push(v);
+			}
+		}
+	}
+
+	// Returns shortest path from BFS source to x, or {} if unreachable
+	vector<int> get_path(int x) {
+		if (dist.empty() || dist[x] == -1) return {};
+		vector<int> res;
+		for (; x != -1; x = par[x]) res.push_back(x);
+		reverse(all(res)); return res;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

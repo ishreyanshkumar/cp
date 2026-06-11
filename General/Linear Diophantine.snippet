@@ -1,0 +1,64 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Linear Diophantine Equation</Title>
+		<Author>Tempest</Author>
+		<Description>Solves ax + by = c. Returns false if c % gcd(a,b) != 0. Provides helpers to shift solution to minimum non-negative x.</Description>
+		<Shortcut>glde</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll a, b, c; re(a, b, c); // e.g. 25 18 839
+	ll x, y, g;
+	if (LDE::solve(a, b, c, x, y, g)) {
+		pr("Particular:", x, y);
+		LDE::shift_x_min(x, y, a, b, 0); // smallest x >= 0
+		pr("Min non-neg x:", x, y);
+		LDE::shift_x_min(x, y, a, b, 1); // smallest x >= 1
+		pr("Min positive x:", x, y);
+	} else {
+		pr("Impossible");
+	}
+}
+*/
+
+struct LDE {
+	static ll exgcd(ll a, ll b, ll& x, ll& y) {
+		if (!b) return x = 1, y = 0, a;
+		ll d = exgcd(b, a % b, y, x);
+		y -= a / b * x;
+		return d;
+	}
+
+	// Solves ax + by = c. Updates x, y to a particular solution. g = gcd(|a|,|b|).
+	static bool solve(ll a, ll b, ll c, ll& x, ll& y, ll& g) {
+		g = exgcd(abs(a), abs(b), x, y);
+		if (c % g) return false;
+		x *= c / g; y *= c / g;
+		if (a < 0) x = -x;
+		if (b < 0) y = -y;
+		return true;
+	}
+
+	// Shifts solution by k steps: x += k*(b/g), y -= k*(a/g)
+	static void shift(ll& x, ll& y, ll a, ll b, ll k) {
+		ll g = __gcd(abs(a), abs(b));
+		x += k * (b / g); y -= k * (a / g);
+	}
+
+	// Adjusts so x is the smallest value >= min_val
+	static void shift_x_min(ll& x, ll& y, ll a, ll b, ll min_val) {
+		ll g = __gcd(abs(a), abs(b));
+		ll step = abs(b / g);
+		if (!step) return;
+		ll rem = ((x - min_val) % step + step) % step;
+		ll k = (min_val + rem - x) / (b / g);
+		shift(x, y, a, b, k);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

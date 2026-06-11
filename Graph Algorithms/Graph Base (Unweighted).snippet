@@ -1,0 +1,31 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Unweighted Graph Base</Title>
+		<Author>Graphest</Author>
+		<Description>Adjacency-list graph with directed/undirected edge helpers and 1-indexed input reader. Base for all unweighted graph plugins.</Description>
+		<Shortcut>grgraph</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+struct Graph {
+	int n;
+	vector<vector<int>> adj;
+
+	Graph(int _n) : n(_n), adj(n) {}
+
+	void add(int u, int v)  { adj[u].push_back(v); }
+	void add2(int u, int v) { adj[u].push_back(v); adj[v].push_back(u); }
+
+	// Reads m edges (1-indexed input, converts to 0-based)
+	void read(int m, bool directed = true) {
+		F0R(i, m) {
+			int u, v; re(u, v);
+			directed ? add(u-1, v-1) : add2(u-1, v-1);
+		}
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

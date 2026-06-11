@@ -1,0 +1,68 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Trie (Prefix Tree)</Title>
+		<Author>Tempest</Author>
+		<Description>Trie for lowercase-letter strings. Supports insert, exact search, prefix check, and count of words with prefix. Array-of-pointers node.</Description>
+		<Shortcut>dstrie</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	Trie t;
+	int n; re(n);
+	F0R(i, n) { string s; re(s); t.insert(s); }
+
+	string q; re(q);
+	pr(t.search(q));         // exact match count
+	pr(t.count_prefix(q));   // words starting with q
+}
+*/
+
+struct Trie {
+	struct Node {
+		array<Node*, 26> ch{};
+		int cnt = 0; // end-of-word count
+		int pass = 0; // words passing through
+	};
+
+	Node* root = new Node();
+
+	void insert(const string& s) {
+		Node* cur = root;
+		for (char c : s) {
+			int i = c - 'a';
+			if (!cur->ch[i]) cur->ch[i] = new Node();
+			cur = cur->ch[i];
+			cur->pass++;
+		}
+		cur->cnt++;
+	}
+
+	// Returns count of exact insertions of s
+	int search(const string& s) {
+		Node* cur = root;
+		for (char c : s) {
+			int i = c - 'a';
+			if (!cur->ch[i]) return 0;
+			cur = cur->ch[i];
+		}
+		return cur->cnt;
+	}
+
+	// Returns count of inserted words that start with prefix
+	int count_prefix(const string& prefix) {
+		Node* cur = root;
+		for (char c : prefix) {
+			int i = c - 'a';
+			if (!cur->ch[i]) return 0;
+			cur = cur->ch[i];
+		}
+		return cur->pass;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

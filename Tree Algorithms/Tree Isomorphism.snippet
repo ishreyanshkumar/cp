@@ -1,0 +1,70 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Tree Isomorphism (Hashing)</Title>
+		<Author>Graphest</Author>
+		<Description>Checks if two unrooted trees are isomorphic in O(N log N) by computing a canonical hash for each. Re-roots at the centroid before hashing to make the result root-independent. Returns true if isomorphic.</Description>
+		<Shortcut>trisomorph</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	Graph G1(n), G2(n);
+	G1.read(n-1, false); G2.read(n-1, false);
+	pr(trees_isomorphic(G1, G2) ? "YES" : "NO");
+}
+*/
+
+// Hash a rooted tree; children hashes sorted for canonical form
+map<vector<ll>,ll> hash_map;
+ll next_id = 1;
+
+ll tree_hash(int u, int p, const Graph& G) {
+	vector<ll> child_hashes;
+	EACH(v, G.adj[u]) if (v!=p) child_hashes.push_back(tree_hash(v,u,G));
+	sort(all(child_hashes));
+	if (!hash_map.count(child_hashes)) hash_map[child_hashes] = next_id++;
+	return hash_map[child_hashes];
+}
+
+// Find centroid(s) of tree rooted at 0
+vector<int> find_centroids(const Graph& G) {
+	int n = G.n;
+	vi sz(n,1); vector<bool> del(n,false);
+	function<void(int,int)> calc = [&](int u,int p){
+		EACH(v,G.adj[u]) if(v!=p&&!del[v]){calc(v,u);sz[u]+=sz[v];}
+	};
+	calc(0,-1);
+	vector<int> res;
+	function<void(int,int)> find = [&](int u,int p){
+		bool is_c=true;
+		EACH(v,G.adj[u]) if(v!=p&&!del[v]){
+			if(sz[v]>n/2) is_c=false;
+			find(v,u);
+		}
+		if(n-sz[u]>n/2) is_c=false;
+		if(is_c) res.push_back(u);
+	};
+	find(0,-1);
+	return res;
+}
+
+ll canonical_hash(const Graph& G) {
+	auto cs = find_centroids(G);
+	// Hash from each centroid, take minimum for unrooted canonical form
+	vector<ll> hashes;
+	EACH(c,cs) hashes.push_back(tree_hash(c,-1,G));
+	sort(all(hashes));
+	return hashes[0]; // or combine both if two centroids
+}
+
+bool trees_isomorphic(const Graph& G1, const Graph& G2) {
+	if (G1.n != G2.n) return false;
+	return canonical_hash(G1) == canonical_hash(G2);
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

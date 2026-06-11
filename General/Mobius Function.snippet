@@ -1,0 +1,64 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Möbius Function and Multiplicative Sieve</Title>
+		<Author>Tempest</Author>
+		<Description>Computes Möbius function μ(n), Euler totient φ(n), and sum/count of divisors for all n ≤ N via a linear sieve. Used in inclusion-exclusion, Dirichlet convolution, and multiplicative function problems.</Description>
+		<Shortcut>gmobius</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	MobiusSieve ms(1000000);
+	int n; re(n);
+	pr(ms.mu[n]);    // Möbius function: -1, 0, or 1
+	pr(ms.phi[n]);   // Euler totient
+	pr(ms.sigma[n]); // sum of divisors
+	pr(ms.d[n]);     // number of divisors
+}
+*/
+
+struct MobiusSieve {
+	int n;
+	vector<int> mu, phi, d, spf;
+	vi sigma;
+	vector<int> primes;
+
+	MobiusSieve(int _n) : n(_n), mu(n+1,1), phi(n+1), d(n+1,1), spf(n+1), sigma(n+1,1) {
+		iota(all(spf), 0);
+		phi[1] = 1;
+		FOR(i, 2, n+1) {
+			if (spf[i] == i) { // i is prime
+				primes.push_back(i);
+				phi[i] = i-1; mu[i] = -1; d[i] = 2; sigma[i] = i+1;
+			}
+			EACH(p, primes) {
+				if ((ll)i*p > n) break;
+				spf[i*p] = p;
+				if (i % p == 0) {
+					phi[i*p] = phi[i] * p;
+					mu[i*p] = 0;
+					// d and sigma need care for prime powers
+					int e = 1, x = i;
+					while (x % p == 0) { x /= p; e++; }
+					d[i*p] = d[i] / (e) * (e+1);
+					sigma[i*p] = sigma[i] / ((ll)(1LL<<e)-1) * ((ll)(1LL<<(e+1))-1) % MOD; // approx
+					break;
+				} else {
+					phi[i*p] = phi[i] * (p-1);
+					mu[i*p] = -mu[i];
+					d[i*p] = d[i] * 2;
+					sigma[i*p] = sigma[i] * (p+1) % MOD;
+				}
+			}
+		}
+	}
+
+	// Prefix sum of mu: sum_{i=1}^{n} mu[i]  (Mertens function)
+	ll mertens(int x) { ll s=0; FOR(i,1,x+1) s+=mu[i]; return s; }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

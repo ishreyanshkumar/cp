@@ -1,0 +1,51 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Discrete Logarithm (Baby-Step Giant-Step)</Title>
+		<Author>Tempest</Author>
+		<Description>Solves a^x ≡ b (mod m) for x using Baby-Step Giant-Step. O(sqrt(m)) time and space. Returns -1 if no solution exists. Works for non-prime moduli.</Description>
+		<Shortcut>gdlog</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll a, b, m; re(a, b, m);
+	ll x = discrete_log(a, b, m);
+	if (x == -1) pr("No solution");
+	else         pr(x); // smallest non-negative x: a^x ≡ b (mod m)
+}
+*/
+
+// Solves a^x ≡ b (mod m). Returns smallest non-negative x, or -1.
+ll discrete_log(ll a, ll b, ll m) {
+	a %= m; b %= m;
+	if (b == 1 || m == 1) return b % m == 1 ? 0 : -1;
+	ll n = (ll)ceil(sqrt((db)m)) + 1;
+
+	// Baby steps: store a^j -> j for j in [0, n)
+	unordered_map<ll, ll> baby;
+	ll cur = b;
+	for (ll j = 0; j < n; j++) {
+		baby[cur] = j;
+		cur = cur * a % m;
+	}
+
+	// Giant steps: check a^(i*n) for i in [1, n]
+	ll step = 1;
+	for (ll i = 0; i < n; i++) step = step * a % m;
+
+	cur = 1;
+	for (ll i = 1; i <= n + 1; i++) {
+		cur = cur * step % m;
+		if (baby.count(cur)) {
+			ll ans = i * n - baby[cur];
+			return ans >= 0 ? ans : -1;
+		}
+	}
+	return -1;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

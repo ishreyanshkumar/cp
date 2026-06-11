@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Matrix Exponentiation</Title>
+		<Author>Tempest</Author>
+		<Description>Computes M^k mod p in O(n^3 log k) for an n×n matrix. Used for linear recurrences, path counting, and transition DP in O(log n) steps.</Description>
+		<Shortcut>gmatexp</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: k-th Fibonacci number ---
+void solve() {
+	ll k; re(k);
+	if (k <= 1) { pr(k); return; }
+	// Transition: [F(n+1)] = [1 1] * [F(n)]
+	//             [F(n)  ]   [1 0]   [F(n-1)]
+	Matrix base = {{1, 1}, {1, 0}};
+	Matrix res = mat_pow(base, k - 1);
+	pr(res[0][0]); // F(k)
+}
+*/
+
+using Matrix = vector<vector<ll>>;
+
+Matrix mat_mul(const Matrix& A, const Matrix& B, ll mod = MOD) {
+	int n = A.size();
+	Matrix C(n, vector<ll>(n, 0));
+	F0R(i, n) F0R(k, n) if (A[i][k])
+		F0R(j, n) C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % mod;
+	return C;
+}
+
+Matrix mat_pow(Matrix M, ll p, ll mod = MOD) {
+	int n = M.size();
+	Matrix res(n, vector<ll>(n, 0));
+	F0R(i, n) res[i][i] = 1; // identity
+	for (; p; p >>= 1) {
+		if (p & 1) res = mat_mul(res, M, mod);
+		M = mat_mul(M, M, mod);
+	}
+	return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

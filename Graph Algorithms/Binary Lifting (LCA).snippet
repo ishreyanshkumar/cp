@@ -1,0 +1,44 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Binary Lifting (k-th Ancestor + LCA)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin (tree): O(N log N) build, O(log N) k-th ancestor and LCA queries. Works on any rooted unweighted tree in the Graph struct.</Description>
+		<Shortcut>grbinlift</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	int L = 20;
+	vector<vector<int>> up;
+	vector<int> depth;
+
+	void dfs_lift(int u, int p, int d) {
+		depth[u] = d; up[u][0] = p;
+		FOR(i, 1, L) up[u][i] = up[up[u][i-1]][i-1];
+		EACH(v, adj[u]) if (v != p) dfs_lift(v, u, d + 1);
+	}
+
+	void init_lift(int root = 0) {
+		depth.resize(n); up.assign(n, vector<int>(L, root));
+		dfs_lift(root, root, 0);
+	}
+
+	// Returns k-th ancestor of u (clamped to root)
+	int kth(int u, int k) {
+		F0R(i, L) if ((k >> i) & 1) u = up[u][i];
+		return u;
+	}
+
+	int lca(int u, int v) {
+		if (depth[u] < depth[v]) swap(u, v);
+		u = kth(u, depth[u] - depth[v]);
+		if (u == v) return u;
+		ROF(i, 0, L) if (up[u][i] != up[v][i]) { u = up[u][i]; v = up[v][i]; }
+		return up[u][0];
+	}
+
+	int dist(int u, int v) { return depth[u] + depth[v] - 2 * depth[lca(u, v)]; }
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

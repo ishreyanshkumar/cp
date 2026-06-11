@@ -1,0 +1,30 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>0-1 Knapsack</Title>
+		<Author>Tempest</Author>
+		<Description>Classic 0-1 knapsack: maximize value subject to weight <= W. O(N*W) time and O(W) space using rolling array.</Description>
+		<Shortcut>dpknap</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, W; re(n, W);
+	vi wt(n), val(n); re(wt, val);
+	pr(knapsack(n, W, wt, val));
+}
+*/
+
+ll knapsack(int n, int W, const vi& wt, const vi& val) {
+	vector<ll> dp(W + 1, 0);
+	F0R(i, n) {
+		ROF(w, wt[i], W + 1) // iterate backwards to avoid reuse
+			dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);
+	}
+	return dp[W];
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

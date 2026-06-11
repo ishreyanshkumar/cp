@@ -1,0 +1,33 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Floyd-Warshall (All-Pairs Shortest Path)</Title>
+		<Author>Graphest</Author>
+		<Description>WGraph plugin: all-pairs shortest paths. Builds distance matrix from adjacency list. After call, dist_mat[i][j] == BIG means no path. O(N^3).</Description>
+		<Shortcut>grfloyd</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<vector<ll>> dist_mat;
+
+	void floyd() {
+		dist_mat.assign(n, vector<ll>(n, BIG));
+		F0R(i, n) dist_mat[i][i] = 0;
+		F0R(u, n) EACH(e, adj[u])
+			dist_mat[u][e.first] = min(dist_mat[u][e.first], e.second);
+
+		F0R(k, n) F0R(i, n) F0R(j, n) {
+			if (dist_mat[i][k] != BIG && dist_mat[k][j] != BIG)
+				dist_mat[i][j] = min(dist_mat[i][j], dist_mat[i][k] + dist_mat[k][j]);
+		}
+	}
+
+	// After floyd(): check for negative cycles (dist_mat[i][i] < 0)
+	bool has_neg_cycle() {
+		F0R(i, n) if (dist_mat[i][i] < 0) return true;
+		return false;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

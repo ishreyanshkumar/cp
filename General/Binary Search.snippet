@@ -1,0 +1,51 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Generalized Binary Search</Title>
+		<Author>Tempest</Author>
+		<Description>Binary search templates for discrete (integer) and continuous (floating point) ranges. Predicate must be monotonic: true...true, false...false. Returns last true position.</Description>
+		<Shortcut>gbs</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	// Discrete: last index where a[m] <= 5.
+	// L must be strictly below the minimum valid answer (use -1 as sentinel).
+	// R must be strictly above the maximum valid answer (use n as sentinel).
+	ll idx = bs_discrete(-1, n, [&](ll m) { return a[m] <= 5; });
+	// idx == -1 means condition never true; idx == n-1 means always true.
+
+	// Continuous: find sqrt(x) to high precision.
+	db x = 2.0;
+	db sq = bs_continuous(0.0, max(1.0, x), [&](db m) { return m * m < x; });
+	pr(sq); cout << '\n';
+}
+*/
+
+// Returns the largest integer m in (L, R) where f(m) is true.
+template<class F>
+ll bs_discrete(ll L, ll R, F f) {
+	while (R - L > 1) {
+		ll m = L + (R - L) / 2;
+		(f(m) ? L : R) = m;
+	}
+	return L;
+}
+
+// Returns the boundary point in [L, R] for a continuous predicate.
+template<class F>
+db bs_continuous(db L, db R, F f, int steps = 150) {
+	F0R(i, steps) {
+		db m = L + (R - L) * 0.5;
+		(f(m) ? L : R) = m;
+	}
+	return L;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,45 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Articulation Points and Bridges</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: finds all articulation points (cut vertices) and bridges in an undirected graph using a single DFS. O(V+E). A bridge removal disconnects the graph; removing an articulation point splits it.</Description>
+		<Shortcut>grbridges</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<int> disc, low;
+	vector<bool> is_ap;
+	vector<pair<int,int>> bridges;
+	int timer_ap = 0;
+
+	void dfs_ap(int u, int p) {
+		disc[u] = low[u] = ++timer_ap;
+		int children = 0;
+		EACH(v, adj[u]) {
+			if (!disc[v]) {
+				children++;
+				dfs_ap(v, u);
+				low[u] = min(low[u], low[v]);
+				// Articulation point condition
+				if ((p == -1 && children > 1) || (p != -1 && low[v] >= disc[u]))
+					is_ap[u] = true;
+				// Bridge condition
+				if (low[v] > disc[u])
+					bridges.push_back({u, v});
+			} else if (v != p) {
+				low[u] = min(low[u], disc[v]);
+			}
+		}
+	}
+
+	// Call this. Populates is_ap[] and bridges[].
+	void find_bridges_ap() {
+		disc.assign(n, 0); low.assign(n, 0); is_ap.assign(n, false);
+		bridges.clear(); timer_ap = 0;
+		F0R(i, n) if (!disc[i]) dfs_ap(i, -1);
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

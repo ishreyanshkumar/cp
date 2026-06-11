@@ -1,0 +1,65 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Suffix Array + LCP Array</Title>
+		<Author>Tempest</Author>
+		<Description>Builds suffix array and LCP array in O(N log N). sa[i] = start of i-th lexicographically smallest suffix. lcp[i] = LCP(sa[i-1], sa[i]).</Description>
+		<Shortcut>strsa</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string s; re(s);
+	SuffixArray sa(s);
+	pr(sa.sa);  // suffix array
+	pr(sa.lcp); // LCP array (lcp[0] = 0, lcp[i] = LCP(sa[i-1], sa[i]))
+}
+*/
+
+struct SuffixArray {
+	int n;
+	vector<int> sa, rk, lcp;
+
+	SuffixArray(const string& s) : n(sz(s)), sa(n), rk(n), lcp(n) {
+		build(s);
+		build_lcp(s);
+	}
+
+	void build(const string& s) {
+		iota(all(sa), 0);
+		for (int i = 0; i < n; i++) rk[i] = s[i];
+		vector<int> tmp(n), cnt;
+
+		for (int gap = 1; gap < n; gap <<= 1) {
+			auto cmp = [&](int a, int b) {
+				if (rk[a] != rk[b]) return rk[a] < rk[b];
+				int ra = a+gap < n ? rk[a+gap] : -1;
+				int rb = b+gap < n ? rk[b+gap] : -1;
+				return ra < rb;
+			};
+			sort(all(sa), cmp);
+			tmp[sa[0]] = 0;
+			FOR(i, 1, n) tmp[sa[i]] = tmp[sa[i-1]] + (cmp(sa[i-1], sa[i]) ? 1 : 0);
+			rk = tmp;
+			if (rk[sa[n-1]] == n-1) break;
+		}
+	}
+
+	void build_lcp(const string& s) {
+		vector<int> inv(n);
+		F0R(i, n) inv[sa[i]] = i;
+		for (int i = 0, h = 0; i < n; i++) {
+			if (inv[i] > 0) {
+				int j = sa[inv[i]-1];
+				while (i+h < n && j+h < n && s[i+h] == s[j+h]) h++;
+				lcp[inv[i]] = h;
+				if (h) h--;
+			}
+		}
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

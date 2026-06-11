@@ -1,0 +1,39 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Order-Statistics Tree (Policy-Based)</Title>
+		<Author>Tempest</Author>
+		<Description>GCC policy-based order-statistics tree: O(log N) insert, erase, k-th smallest, and count of elements less than x. Wraps pb_ds tree. Note: duplicate keys unsupported — use pair<val, id> trick.</Description>
+		<Shortcut>dsost</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+
+/* // --- Example Usage ---
+void solve() {
+	OST<ll> ost;
+	// For duplicates use pair<ll, int>:
+	// OST<pair<ll, int>> ost; int id = 0;
+
+	ost.insert(5); ost.insert(2); ost.insert(8);
+
+	pr(ost.order_of_key(5));  // 1 (0-indexed rank)
+	pr(*ost.find_by_order(0)); // 2 (smallest)
+	pr(sz(ost));              // 3
+}
+*/
+
+template<class T, class Cmp = less<T>>
+using OST = tree<T, null_type, Cmp,
+                 rb_tree_tag, tree_order_statistics_node_update>;
+
+// Helper wrappers (ost must be in scope)
+// order_of_key(x)  -> number of elements strictly less than x
+// find_by_order(k) -> iterator to k-th smallest (0-indexed)
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

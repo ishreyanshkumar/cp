@@ -1,0 +1,51 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Biconnected Components (BCC)</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: finds all biconnected components (2-edge-connected subgraphs). Each BCC is a maximal subgraph with no bridges. Uses DFS with edge stack. O(V+E). Useful for bridge trees and 2-connectivity problems.</Description>
+		<Shortcut>grbcc</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	vector<vector<int>> bccs; // each BCC is a list of edge indices
+	vector<pair<int,int>> edge_list;
+	vector<int> disc_bcc, low_bcc;
+	stack<int> edge_stk;
+	int timer_bcc = 0;
+
+	void dfs_bcc(int u, int p_edge) {
+		disc_bcc[u] = low_bcc[u] = ++timer_bcc;
+		for (int i = 0; i < sz(adj[u]); i++) {
+			int v = adj[u][i], eid = /* edge id stored separately */ i;
+			// For undirected: track edge id to avoid going back on same edge
+			if (!disc_bcc[v]) {
+				edge_stk.push(eid);
+				dfs_bcc(v, eid);
+				low_bcc[u] = min(low_bcc[u], low_bcc[v]);
+				if (low_bcc[v] >= disc_bcc[u]) {
+					// Found a BCC
+					vector<int> comp;
+					while (true) {
+						int e = edge_stk.top(); edge_stk.pop();
+						comp.push_back(e);
+						if (e == eid) break;
+					}
+					bccs.push_back(comp);
+				}
+			} else if (eid != p_edge && disc_bcc[v] < disc_bcc[u]) {
+				edge_stk.push(eid);
+				low_bcc[u] = min(low_bcc[u], disc_bcc[v]);
+			}
+		}
+	}
+
+	void find_bccs() {
+		disc_bcc.assign(n, 0); low_bcc.assign(n, 0);
+		timer_bcc = 0; bccs.clear();
+		F0R(i, n) if (!disc_bcc[i]) dfs_bcc(i, -1);
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,47 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Coordinate Compression</Title>
+		<Author>Tempest</Author>
+		<Description>Maps large sparse coordinates to dense 0-based indices. Lazy build: sorts and deduplicates on first query.</Description>
+		<Shortcut>gcc</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi a(n); re(a);
+
+	CoordComp cc;
+	cc.add(a);
+
+	vector<int> comp(n);
+	F0R(i, n) comp[i] = cc.get(a[i]);
+
+	pr(comp);               cout << '\n';
+	pr(cc.orig(comp[0]));   cout << '\n'; // recover original
+	pr(cc.size());          cout << '\n'; // number of distinct values
+}
+*/
+
+struct CoordComp {
+	vi v; bool ready = false;
+
+	void add(ll x)        { v.push_back(x); ready = false; }
+	void add(const vi& a) { v.insert(v.end(), all(a)); ready = false; }
+
+	void build() {
+		if (ready) return;
+		sor(v); v.erase(unique(all(v)), v.end());
+		ready = true;
+	}
+
+	int get(ll x)  { build(); return int(lower_bound(all(v), x) - v.begin()); }
+	ll orig(int i) { build(); return v[i]; }
+	int size()     { build(); return sz(v); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

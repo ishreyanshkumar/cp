@@ -1,0 +1,44 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Tree Diameter and All Farthest Nodes</Title>
+		<Author>Graphest</Author>
+		<Description>Graph plugin: finds tree diameter (longest path) in O(N) using two BFS/DFS. Also computes farthest[u] = distance from u to its farthest node for every u, which equals the eccentricity and is used in k-centre problems.</Description>
+		<Shortcut>trdiameter</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+	// Returns {diameter_length, endpoint_u, endpoint_v}
+	tuple<int,int,int> tree_diameter() {
+		// BFS from node 0, find farthest node u
+		vi d0 = bfs_dist(0);
+		int u = max_element(all(d0)) - d0.begin();
+		// BFS from u, find farthest node v
+		vi du = bfs_dist(u);
+		int v = max_element(all(du)) - du.begin();
+		return {du[v], u, v};
+	}
+
+	// BFS distances from source (uses adj — works on Graph plugin)
+	vi bfs_dist(int s) {
+		vi d(n, -1); d[s]=0;
+		queue<int> q; q.push(s);
+		while (!q.empty()) {
+			int u=q.front(); q.pop();
+			EACH(v,adj[u]) if(d[v]==-1){d[v]=d[u]+1;q.push(v);}
+		}
+		return d;
+	}
+
+	// farthest[u] = max distance from u to any other node
+	// = max(dist_from_u, dist_from_v) where u,v are diameter endpoints
+	vi all_farthest() {
+		auto [diam,u,v] = tree_diameter();
+		vi du = bfs_dist(u), dv = bfs_dist(v), res(n);
+		F0R(i,n) res[i] = max(du[i], dv[i]);
+		return res;
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

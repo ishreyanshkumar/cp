@@ -1,0 +1,63 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Centroid Decomposition</Title>
+		<Author>Graphest</Author>
+		<Description>Decomposes a tree into a centroid tree for O(N log N) distance-related queries. Each node's subtree in the centroid tree has size <= N/2. Graph plugin.</Description>
+		<Shortcut>trcentroid</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: count pairs with dist == k ---
+	CentDec cd(G);
+	ll ans = 0;
+	cd.decompose([&](int c, vector<pair<int,int>>& paths) {
+		// paths = {node, dist_from_c} for all nodes in current subtree
+		// solve subproblem here using paths
+	});
+*/
+
+struct CentDec {
+	int n;
+	vector<vi> adj;
+	vi sz, dead;
+
+	CentDec(const Graph& G) : n(G.n), adj(G.adj), sz(G.n), dead(G.n, 0) {}
+
+	void calc_sz(int u, int p) {
+		sz[u] = 1;
+		EACH(v, adj[u]) if (v != p && !dead[v]) { calc_sz(v, u); sz[u] += sz[v]; }
+	}
+
+	int get_centroid(int u, int p, int tree_sz) {
+		EACH(v, adj[u]) if (v != p && !dead[v] && sz[v] > tree_sz / 2) return get_centroid(v, u, tree_sz);
+		return u;
+	}
+
+	// f(centroid, paths): called for each centroid with nodes in its subtree
+	template<class F>
+	void decompose(int u, F& f) {
+		calc_sz(u, -1);
+		int c = get_centroid(u, -1, sz[u]);
+		dead[c] = 1;
+
+		vector<pair<int,int>> paths;
+		function<void(int,int,int)> dfs = [&](int v, int p, int d) {
+			paths.push_back({v, d});
+			EACH(w, adj[v]) if (w != p && !dead[w]) dfs(w, v, d+1);
+		};
+		dfs(c, -1, 0);
+
+		f(c, paths);
+
+		EACH(v, adj[c]) if (!dead[v]) decompose(v, f);
+		dead[c] = 0;
+	}
+
+	template<class F>
+	void decompose(F f) { decompose(0, f); }
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

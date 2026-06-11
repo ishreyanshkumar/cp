@@ -1,0 +1,29 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Primality Check (Trial Division)</Title>
+		<Author>Tempest</Author>
+		<Description>O(sqrt(N)) primality test using 6k+1 wheel optimization. Use for single queries; for bulk use Sieve.</Description>
+		<Shortcut>gisprime</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll n; re(n);
+	pr(is_prime(n) ? "YES" : "NO");
+}
+*/
+
+bool is_prime(ll n) {
+	if (n < 2) return false;
+	if (n == 2 || n == 3) return true;
+	if (n % 2 == 0 || n % 3 == 0) return false;
+	for (ll x = 5; x * x <= n; x += 6)
+		if (n % x == 0 || n % (x + 2) == 0) return false;
+	return true;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

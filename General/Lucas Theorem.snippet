@@ -1,0 +1,51 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Lucas Theorem (nCr mod small prime)</Title>
+		<Author>Tempest</Author>
+		<Description>Computes C(n, r) mod p for large n, r and small prime p using Lucas' theorem. O(p) precomputation, O(log_p n) per query.</Description>
+		<Shortcut>glucas</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	ll n, r, p; re(n, r, p); // p must be a small prime
+	Lucas L(p);
+	pr(L.query(n, r));
+}
+*/
+
+struct Lucas {
+	ll p;
+	vector<ll> fac, finv;
+
+	Lucas(ll _p) : p(_p), fac(p), finv(p) {
+		fac[0] = 1;
+		FOR(i, 1, p) fac[i] = fac[i - 1] * i % p;
+		finv[p - 1] = power(fac[p - 1], p - 2);
+		R0F(i, p - 1) finv[i] = finv[i + 1] * (i + 1) % p;
+	}
+
+	ll power(ll a, ll b) {
+		ll res = 1; a %= p;
+		for (; b; b >>= 1) { if (b & 1) res = res * a % p; a = a * a % p; }
+		return res;
+	}
+
+	// C(n, r) mod p for n, r < p
+	ll small_nCr(ll n, ll r) {
+		if (r < 0 || r > n) return 0;
+		return fac[n] * finv[r] % p * finv[n - r] % p;
+	}
+
+	// C(n, r) mod p (Lucas recursion)
+	ll query(ll n, ll r) {
+		if (r == 0) return 1;
+		return query(n / p, r / p) * small_nCr(n % p, r % p) % p;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

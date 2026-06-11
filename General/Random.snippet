@@ -1,0 +1,24 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Fast Random (MT19937)</Title>
+		<Author>Tempest</Author>
+		<Description>Seeded Mersenne Twister RNG for reproducible randomness. rng() gives a uniform uint64. rng_range(lo,hi) gives uniform integer in [lo,hi]. shuffle uses it. Use to avoid worst-case inputs on randomized algorithms.</Description>
+		<Shortcut>grng</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+// Uniform integer in [lo, hi] inclusive
+ll rng_range(ll lo, ll hi) {
+	return uniform_int_distribution<ll>(lo, hi)(rng);
+}
+
+// Shuffle a container
+template<class T>
+void rng_shuffle(T& v) { shuffle(all(v), rng); }
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

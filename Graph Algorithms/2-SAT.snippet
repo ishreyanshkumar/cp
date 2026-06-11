@@ -1,0 +1,73 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>2-SAT Solver</Title>
+		<Author>Graphest</Author>
+		<Description>Solves 2-SAT using Tarjan's SCC. Variables are 0-indexed. add_clause(i, f, j, g) means (x_i==f OR x_j==g). Returns false if unsatisfiable. O(N+M).</Description>
+		<Shortcut>gr2sat</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n = 2; // Two 0-indexed variables
+	TwoSat ts(n);
+
+	// Clause: (X0 OR X1)   =>  at least one is true
+	ts.add_clause(0, true, 1, true);
+
+	// Clause: (!X0 OR !X1) =>  at least one is false (XOR with above)
+	ts.add_clause(0, false, 1, false);
+
+	if (ts.solve()) {
+		F0R(i, n) cout << "X" << i << "=" << ts.ans[i] << ' ';
+	} else {
+		pr("Impossible");
+	}
+}
+*/
+
+struct TwoSat {
+	int n;
+	vector<vector<int>> adj;
+	vector<bool> ans;
+
+	TwoSat(int _n) : n(_n), adj(2 * n) {}
+
+	// Add clause (x_i == f) OR (x_j == g)
+	void add_clause(int i, bool f, int j, bool g) {
+		adj[2*i + !f].push_back(2*j + g);
+		adj[2*j + !g].push_back(2*i + f);
+	}
+
+	// Force variable i to value f
+	void force(int i, bool f) { add_clause(i, f, i, f); }
+
+	bool solve() {
+		vector<int> dfn(2*n, 0), low(2*n), comp(2*n, -1), st;
+		int timer = 0, C = 0;
+		function<void(int)> dfs = [&](int u) {
+			dfn[u] = low[u] = ++timer;
+			st.push_back(u);
+			EACH(v, adj[u]) {
+				if (!dfn[v]) { dfs(v); low[u] = min(low[u], low[v]); }
+				else if (comp[v] == -1) low[u] = min(low[u], dfn[v]);
+			}
+			if (low[u] == dfn[u]) {
+				int v; do { v = st.back(); st.pop_back(); comp[v] = C; } while (v != u);
+				C++;
+			}
+		};
+		F0R(i, 2*n) if (!dfn[i]) dfs(i);
+		ans.resize(n);
+		F0R(i, n) {
+			if (comp[2*i] == comp[2*i+1]) return false;
+			ans[i] = comp[2*i] < comp[2*i+1];
+		}
+		return true;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

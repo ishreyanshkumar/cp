@@ -1,0 +1,58 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Minimum Vertex Cover (König's Theorem)</Title>
+		<Author>Graphest</Author>
+		<Description>For bipartite graphs: min vertex cover = max matching (König's theorem). Finds the actual cover set via alternating path construction after running max bipartite matching. O(VE).</Description>
+		<Shortcut>grminvc</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int L, R, m; re(L, R, m); // L left nodes, R right nodes, m edges
+	// Edges go left[0..L-1] -> right[0..R-1]
+	Graph G(L);
+	F0R(i, m) { int u, v; re(u, v); G.add(u-1, v-1); }
+
+	auto [sz_cover, left_in, right_in] = min_vertex_cover(G, L, R);
+	pr(sz_cover); // = max matching
+	// left_in[i]=true => left node i is in cover
+	// right_in[j]=true => right node j is in cover
+}
+*/
+
+	// Requires max_matching() plugin (gr_bipmatch) to be run first.
+	// Returns {cover_size, left_cover[], right_cover[]}
+	tuple<int, vector<bool>, vector<bool>> min_vertex_cover_bipartite(int L, int R) {
+		// Run matching first
+		int sz = max_matching(R);
+
+		// BFS/DFS on alternating paths from unmatched left nodes
+		vector<bool> L_vis(n, false), R_vis(R, false);
+		queue<int> q;
+		F0R(u, n) if (!L_vis[u]) { // unmatched left nodes
+			bool matched = false;
+			F0R(v, R) if (match[v] == u) { matched = true; break; }
+			if (!matched) { L_vis[u] = true; q.push(u); }
+		}
+		while (!q.empty()) {
+			int u = q.front(); q.pop();
+			EACH(v, adj[u]) if (!R_vis[v]) {
+				R_vis[v] = true;
+				if (match[v] != -1 && !L_vis[match[v]]) {
+					L_vis[match[v]] = true;
+					q.push(match[v]);
+				}
+			}
+		}
+		// Cover = left NOT visited + right visited
+		vector<bool> lc(n), rc(R);
+		F0R(i, n) lc[i] = !L_vis[i];
+		F0R(j, R) rc[j] =  R_vis[j];
+		return {sz, lc, rc};
+	}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,60 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>2D Fenwick Tree (BIT)</Title>
+		<Author>Tempest</Author>
+		<Description>2D Binary Indexed Tree for point updates and prefix/rectangle sum queries on an N×M grid. O(log N * log M) per operation.</Description>
+		<Shortcut>dsbit2d</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, m, q; re(n, m, q);
+	BIT2D<ll> bit(n, m);
+
+	while (q--) {
+		int t; re(t);
+		if (t == 1) {
+			int x, y; ll v; re(x, y, v);
+			bit.add(x, y, v); // 1-indexed
+		} else {
+			int x1, y1, x2, y2; re(x1, y1, x2, y2);
+			pr(bit.query(x1, y1, x2, y2)); cout << '\n';
+		}
+	}
+}
+*/
+
+template<class T> struct BIT2D {
+	int n, m;
+	vector<vector<T>> v;
+
+	BIT2D(int _n, int _m) : n(_n), m(_m), v(n + 1, vector<T>(m + 1, T{})) {}
+
+	// Point add at (x, y), 1-indexed
+	void add(int x, int y, T d) {
+		for (int i = x; i <= n; i += i & -i)
+			for (int j = y; j <= m; j += j & -j)
+				v[i][j] += d;
+	}
+
+	// Prefix sum [1,1]..[x,y], 1-indexed
+	T query(int x, int y) {
+		T s{};
+		for (int i = x; i > 0; i -= i & -i)
+			for (int j = y; j > 0; j -= j & -j)
+				s += v[i][j];
+		return s;
+	}
+
+	// Rectangle sum [x1,y1]..[x2,y2], 1-indexed
+	T query(int x1, int y1, int x2, int y2) {
+		return query(x2, y2) - query(x1 - 1, y2)
+		     - query(x2, y1 - 1) + query(x1 - 1, y1 - 1);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,54 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Chinese Remainder Theorem (Generalized)</Title>
+		<Author>Tempest</Author>
+		<Description>Solves x = A[i] (mod M[i]) for non-coprime moduli via pair-wise merging. Returns {x, lcm} with 0 <= x < lcm, or {-1,-1} if inconsistent.</Description>
+		<Shortcut>gcrt</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	vi A(n), M(n); re(A, M); // A = remainders, M = moduli
+
+	auto [x, lcm] = CRT::calc(A, M);
+	if (x == -1) pr("No Solution");
+	else pr(x, lcm); // smallest non-negative x and the period
+}
+*/
+
+struct CRT {
+	static ll exgcd(ll a, ll b, ll& x, ll& y) {
+		if (!b) return x = 1, y = 0, a;
+		ll d = exgcd(b, a % b, y, x);
+		y -= a / b * x;
+		return d;
+	}
+
+	// Merge two congruences: x = r1 (mod m1) and x = r2 (mod m2)
+	static pi merge(pi e1, pi e2) {
+		auto [r1, m1] = e1; auto [r2, m2] = e2;
+		ll x, y, g = exgcd(m1, m2, x, y);
+		if ((r2 - r1) % g) return {-1, -1};
+		ll step = m2 / g;
+		ll k = (__int128)(r2 - r1) / g * x % step;
+		ll r = r1 + k * m1;
+		ll m = m1 * step;
+		return {((r % m) + m) % m, m};
+	}
+
+	static pi calc(const vi& A, const vi& M) {
+		pi cur = {0, 1};
+		F0R(i, sz(A)) {
+			cur = merge(cur, {A[i], M[i]});
+			if (cur.first == -1) return {-1, -1};
+		}
+		return cur;
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,89 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Persistent Segment Tree</Title>
+		<Author>Tempest</Author>
+		<Description>Functional (persistent) segment tree. Each update creates a new root sharing unchanged nodes. Supports point update + range query on any historical version. O(log N) per op, O(N log N) total space.</Description>
+		<Shortcut>dspersist</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: k-th smallest in range [l, r] using merge sort tree ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+
+	// Coordinate compress values
+	vi sorted_a = a; sor(sorted_a); sorted_a.erase(unique(all(sorted_a)), sorted_a.end());
+	auto compress = [&](ll x) { return int(lower_bound(all(sorted_a), x) - sorted_a.begin()) + 1; };
+
+	PersistSeg ps(sz(sorted_a));
+	vector<int> roots(n + 1);
+	roots[0] = ps.build(sz(sorted_a));
+	F0R(i, n) roots[i + 1] = ps.update(roots[i], compress(a[i]), 1);
+
+	while (q--) {
+		int l, r, k; re(l, r, k); // 1-indexed; k-th smallest in a[l..r]
+		pr(sorted_a[ps.kth(roots[l-1], roots[r], k) - 1]); cout << '\n';
+	}
+}
+*/
+
+struct PersistSeg {
+	struct Node { int l, r; ll sum; };
+	vector<Node> t;
+	int n;
+
+	PersistSeg(int _n) : n(_n) { t.reserve(_n * 40); }
+
+	int new_node(int l = 0, int r = 0, ll sum = 0) {
+		t.push_back({l, r, sum}); return sz(t) - 1;
+	}
+
+	// Build empty tree over [1, n], returns root id
+	int build(int lo = 0, int hi = -1) {
+		if (hi == -1) hi = n;
+		if (lo == hi) return new_node();
+		int mid = (lo + hi) / 2;
+		int l = build(lo, mid), r = build(mid + 1, hi);
+		return new_node(l, r, 0);
+	}
+
+	// Update position pos (+val). Returns new root id.
+	int update(int prev, int pos, ll val, int lo = 1, int hi = -1) {
+		if (hi == -1) hi = n;
+		if (lo == hi) return new_node(0, 0, t[prev].sum + val);
+		int mid = (lo + hi) / 2;
+		if (pos <= mid) {
+			int l = update(t[prev].l, pos, val, lo, mid);
+			return new_node(l, t[prev].r, t[prev].sum + val);
+		} else {
+			int r = update(t[prev].r, pos, val, mid + 1, hi);
+			return new_node(t[prev].l, r, t[prev].sum + val);
+		}
+	}
+
+	// Range sum query [l, r] on a version
+	ll query(int v, int l, int r, int lo = 1, int hi = -1) {
+		if (hi == -1) hi = n;
+		if (l > hi || r < lo) return 0;
+		if (l <= lo && hi <= r) return t[v].sum;
+		int mid = (lo + hi) / 2;
+		return query(t[v].l, l, r, lo, mid)
+		     + query(t[v].r, l, r, mid + 1, hi);
+	}
+
+	// k-th smallest: uses two roots (prefix trees for version L-1 and R)
+	int kth(int vl, int vr, int k, int lo = 1, int hi = -1) {
+		if (hi == -1) hi = n;
+		if (lo == hi) return lo;
+		int mid = (lo + hi) / 2;
+		ll left_cnt = t[t[vr].l].sum - t[t[vl].l].sum;
+		if (k <= left_cnt) return kth(t[vl].l, t[vr].l, k, lo, mid);
+		return kth(t[vl].r, t[vr].r, k - left_cnt, mid + 1, hi);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

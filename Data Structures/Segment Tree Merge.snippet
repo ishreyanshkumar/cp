@@ -1,0 +1,83 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Segment Tree Merge (Dynamic / Sparse)</Title>
+		<Author>Tempest</Author>
+		<Description>Merges two sparse segment trees in O(K log N) where K = overlapping nodes. Each node is created on-demand. Used for merging subtree frequency maps in tree problems, e.g. k-th smallest value in a subtree after online updates.</Description>
+		<Shortcut>dssegtmerge</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage: k-th smallest in each subtree ---
+void solve() {
+	int n; re(n);
+	vi val(n); re(val);
+	Graph G(n); G.read(n-1, false);
+
+	SegMerge sm(n); // coordinate-compressed value range [1..n]
+	vi roots(n, 0);
+	F0R(i, n) roots[i] = sm.update(0, val[i], 1);
+
+	function<void(int,int)> dfs = [&](int u, int p) {
+		EACH(v, G.adj[u]) if (v != p) {
+			dfs(v, u);
+			roots[u] = sm.merge(roots[u], roots[v]);
+		}
+		// Query k-th smallest in subtree of u:
+		// sm.kth(roots[u], k)
+	};
+	dfs(0, -1);
+}
+*/
+
+struct SegMerge {
+	struct Node { int l, r; ll sum; };
+	vector<Node> t = {{0,0,0}};
+	int N; // value range [1..N]
+
+	SegMerge(int _N) : N(_N) {}
+
+	int update(int v, int pos, ll val, int lo=1, int hi=-1) {
+		if (hi==-1) hi=N;
+		int nv = sz(t); t.push_back(v ? t[v] : Node{0,0,0});
+		t[nv].sum += val;
+		if (lo==hi) return nv;
+		int mid=(lo+hi)/2;
+		if (pos<=mid) t[nv].l = update(t[v].l, pos, val, lo, mid);
+		else          t[nv].r = update(t[v].r, pos, val, mid+1, hi);
+		return nv;
+	}
+
+	// Destructive merge: merges b into a, returns new root
+	int merge(int a, int b, int lo=1, int hi=-1) {
+		if (hi==-1) hi=N;
+		if (!a) return b; if (!b) return a;
+		if (lo==hi) { t[a].sum += t[b].sum; return a; }
+		int mid=(lo+hi)/2;
+		t[a].l = merge(t[a].l, t[b].l, lo, mid);
+		t[a].r = merge(t[a].r, t[b].r, mid+1, hi);
+		t[a].sum = t[t[a].l].sum + t[t[a].r].sum;
+		return a;
+	}
+
+	// k-th smallest in tree rooted at v (1-indexed k)
+	int kth(int v, ll k, int lo=1, int hi=-1) {
+		if (hi==-1) hi=N;
+		if (lo==hi) return lo;
+		int mid=(lo+hi)/2;
+		if (t[t[v].l].sum >= k) return kth(t[v].l, k, lo, mid);
+		return kth(t[v].r, k-t[t[v].l].sum, mid+1, hi);
+	}
+
+	ll query(int v, int l, int r, int lo=1, int hi=-1) {
+		if (hi==-1) hi=N;
+		if (!v||l>hi||r<lo) return 0;
+		if (l<=lo&&hi<=r) return t[v].sum;
+		int mid=(lo+hi)/2;
+		return query(t[v].l,l,r,lo,mid)+query(t[v].r,l,r,mid+1,hi);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

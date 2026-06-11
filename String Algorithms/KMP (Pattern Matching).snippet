@@ -1,0 +1,48 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>KMP — Pattern Matching</Title>
+		<Author>Tempest</Author>
+		<Description>Builds failure function in O(|P|) and finds all occurrences of pattern P in text T in O(|T|+|P|).</Description>
+		<Shortcut>strkmp</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	string t, p; re(t, p);
+	auto occ = kmp(t, p);
+	pr(sz(occ)); // count of occurrences
+	EACH(i, occ) pr(i); // 0-based starting positions
+}
+*/
+
+// Builds failure function (prefix function) for pattern p
+vector<int> build_fail(const string& p) {
+	int m = sz(p);
+	vector<int> f(m, 0);
+	for (int i = 1; i < m; i++) {
+		int j = f[i-1];
+		while (j && p[i] != p[j]) j = f[j-1];
+		if (p[i] == p[j]) j++;
+		f[i] = j;
+	}
+	return f;
+}
+
+// Returns sorted list of 0-based starting positions of p in t
+vector<int> kmp(const string& t, const string& p) {
+	auto f = build_fail(p);
+	vector<int> res;
+	int n = sz(t), m = sz(p), j = 0;
+	F0R(i, n) {
+		while (j && t[i] != p[j]) j = f[j-1];
+		if (t[i] == p[j]) j++;
+		if (j == m) { res.push_back(i - m + 1); j = f[j-1]; }
+	}
+	return res;
+}
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

@@ -1,0 +1,46 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Floyd's Cycle Detection (Functional Graph)</Title>
+		<Author>Graphest</Author>
+		<Description>Finds cycle start node and cycle length in a functional graph (each node has exactly one successor). O(cycle_length) time, O(1) extra space.</Description>
+		<Shortcut>grcycle</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n; re(n);
+	FunctionalGraph fg(n);
+	F0R(i, n) { int v; re(v); fg.add_edge(i, v - 1); }
+
+	auto [start, len] = fg.analyze(0);
+	pr(start, len);
+}
+*/
+
+struct FunctionalGraph {
+	int n; vector<int> succ;
+	FunctionalGraph(int _n) : n(_n), succ(n) {}
+
+	void add_edge(int u, int v) { succ[u] = v; }
+
+	// Returns {cycle_start_node, cycle_length} starting from node u
+	pair<int,int> analyze(int u) {
+		int a = succ[u], b = succ[succ[u]];
+		while (a != b) { a = succ[a]; b = succ[succ[b]]; }
+
+		a = u;
+		while (a != b) { a = succ[a]; b = succ[b]; }
+		int start = a;
+
+		int len = 1; b = succ[start];
+		while (b != start) { b = succ[b]; len++; }
+
+		return {start, len};
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

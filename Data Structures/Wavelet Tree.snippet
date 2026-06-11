@@ -1,0 +1,84 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Wavelet Tree</Title>
+		<Author>Tempest</Author>
+		<Description>Persistent wavelet tree on a static array: O(N log V) build, O(log V) per query for k-th smallest, count less-than, count in range, and count in value-range. Values must be coordinate-compressed to [0, maxV).</Description>
+		<Shortcut>dswavelet</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+/* // --- Example Usage ---
+void solve() {
+	int n, q; re(n, q);
+	vi a(n); re(a);
+
+	// Coordinate compress
+	vi sorted_a = a; sor(sorted_a); sorted_a.erase(unique(all(sorted_a)), sorted_a.end());
+	int V = sz(sorted_a);
+	vi b(n);
+	F0R(i, n) b[i] = int(lower_bound(all(sorted_a), a[i]) - sorted_a.begin());
+
+	WaveletTree wt(b, V);
+
+	while (q--) {
+		int l, r, k; re(l, r, k); // 0-based [l,r], k-th smallest (1-indexed)
+		pr(sorted_a[wt.kth(l, r, k)]); cout << '\n';
+	}
+}
+*/
+
+struct WaveletTree {
+	int n, lo, hi;
+	vector<int> b; // prefix counts of elements that went left at each level
+	vector<WaveletTree*> left, right;
+
+	// Flat array-based wavelet tree
+	struct Node { vector<int> cnt; }; // cnt[i] = # elements in a[0..i-1] that went left
+	int V; vector<Node> nodes;
+
+	WaveletTree(const vi& a, int _V) : n(sz(a)), V(_V) {
+		nodes.resize(4 * V);
+		build(a, 0, V-1, 1);
+	}
+
+	void build(const vi& arr, int lo, int hi, int v) {
+		int m = sz(arr);
+		nodes[v].cnt.resize(m+1, 0);
+		if (lo==hi) return;
+		int mid=(lo+hi)/2;
+		vi left_a, right_a;
+		F0R(i, m) {
+			nodes[v].cnt[i+1] = nodes[v].cnt[i] + (arr[i]<=mid ? 1 : 0);
+			(arr[i]<=mid ? left_a : right_a).push_back(arr[i]);
+		}
+		if (!left_a.empty())  build(left_a,  lo,    mid,   2*v);
+		if (!right_a.empty()) build(right_a, mid+1, hi,    2*v+1);
+	}
+
+	// k-th smallest in a[l..r] (0-based, 1-indexed k)
+	int kth(int l, int r, int k, int lo=0, int hi=-1, int v=1) {
+		if (hi==-1) hi=V-1;
+		if (lo==hi) return lo;
+		int mid=(lo+hi)/2;
+		int lb=nodes[v].cnt[l], rb=nodes[v].cnt[r+1];
+		int left_cnt = rb - lb;
+		if (k <= left_cnt) return kth(lb, rb-1, k, lo, mid, 2*v);
+		return kth(l-lb+nodes[v].cnt[n], r-rb+1+nodes[v].cnt[n], k-left_cnt, mid+1, hi, 2*v+1);
+	}
+
+	// Count elements in a[l..r] that are <= val (0-based range, val is compressed)
+	int count_leq(int l, int r, int val, int lo=0, int hi=-1, int v=1) {
+		if (hi==-1) hi=V-1;
+		if (val>=hi) return r-l+1;
+		if (val<lo)  return 0;
+		int mid=(lo+hi)/2;
+		int lb=nodes[v].cnt[l], rb=nodes[v].cnt[r+1];
+		return count_leq(lb,rb-1,val,lo,mid,2*v)
+		      +count_leq(l-lb+nodes[v].cnt[n],r-rb+1+nodes[v].cnt[n],val,mid+1,hi,2*v+1);
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>

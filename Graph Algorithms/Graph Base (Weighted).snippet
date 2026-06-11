@@ -1,0 +1,31 @@
+<CodeSnippet Format="1.0.0">
+	<Header>
+		<Title>Weighted Graph Base</Title>
+		<Author>Graphest</Author>
+		<Description>Adjacency-list weighted graph (edge weight = ll). Directed/undirected helpers and 1-indexed input reader. Base for Dijkstra, Kruskal, Prim, Bellman-Ford, Floyd-Warshall plugins.</Description>
+		<Shortcut>grwgraph</Shortcut>
+	</Header>
+	<Snippet>
+		<Code Language="CPP">
+			<![CDATA[
+struct WGraph {
+	int n;
+	vector<vector<pair<int,ll>>> adj;
+
+	WGraph(int _n) : n(_n), adj(n) {}
+
+	void add(int u, int v, ll w)  { adj[u].push_back({v, w}); }
+	void add2(int u, int v, ll w) { add(u, v, w); add(v, u, w); }
+
+	// Reads m weighted edges (1-indexed input, converts to 0-based)
+	void read(int m, bool directed = true) {
+		F0R(i, m) {
+			int u, v; ll w; re(u, v, w);
+			directed ? add(u-1, v-1, w) : add2(u-1, v-1, w);
+		}
+	}
+};
+]]>
+		</Code>
+	</Snippet>
+</CodeSnippet>
